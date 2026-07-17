@@ -1,0 +1,80 @@
+# SX Bans Punishment Templates
+# Pre-defined punishment templates for quick use
+
+templates:
+  hacking:
+    name: "Hacking"
+    type: "TEMP_BAN"
+    duration: "7d"
+    reason: "&cUsing hacked client or unfair advantages"
+    broadcast: true
+
+  spam:
+    name: "Spam"
+    type: "TEMP_MUTE"
+    duration: "1h"
+    reason: "&cSpamming in chat"
+    broadcast: false
+
+  abuse:
+    name: "Abuse"
+    type: "TEMP_BAN"
+    duration: "1d"
+    reason: "&cAbusive behavior towards staff or players"
+    broadcast: true
+
+  griefing:
+    name: "Griefing"
+    type: "TEMP_BAN"
+    duration: "3d"
+    reason: "&cGriefing other players' builds"
+    broadcast: true
+
+  xray:
+    name: "X-Ray"
+    type: "BAN"
+    duration: "-1"
+    reason: "&cUsing X-Ray texture pack or mod"
+    broadcast: true
+
+  advertising:
+    name: "Advertising"
+    type: "TEMP_BAN"
+    duration: "2d"
+    reason: "&cAdvertising other servers"
+    broadcast: true
+
+  toxicity:
+    name: "Toxicity"
+    type: "TEMP_MUTE"
+    duration: "2h"
+    reason: "&cToxic behavior in chat"
+    broadcast: false
+
+  racism:
+    name: "Racism"
+    type: "BAN"
+    duration: "-1"
+    reason: "&cRacist remarks or behavior"
+    broadcast: true
+
+  bug_abuse:
+    name: "Bug Abuse"
+    type: "TEMP_BAN"
+    duration: "5d"
+    reason: "&cAbusing server bugs or glitches"
+    broadcast: true
+
+  impersonation:
+    name: "Impersonation"
+    type: "TEMP_BAN"
+    duration: "3d"
+    reason: "&cImpersonating staff or other players"
+    broadcast: true
+
+  ddos_threat:
+    name: "DDoS Threat"
+    type: "BAN"
+    duration: "-1"
+    reason: "&cThreatening to DDoS the server"
+    broadcast: true

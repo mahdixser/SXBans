@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - SX Bans</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .error-container { width:100%; max-width:500px; }
+
+        .glass-card {
+            background:rgba(255,255,255,0.05);
+            backdrop-filter:blur(20px);
+            -webkit-backdrop-filter:blur(20px);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:16px;
+            box-shadow:0 8px 32px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.1);
+            padding:40px 32px;
+            text-align:center;
+            transition:all 0.4s ease;
+        }
+        .glass-card:hover {
+            background:rgba(255,255,255,0.06);
+            border-color:rgba(108,92,231,0.3);
+            box-shadow:0 12px 48px rgba(108,92,231,0.15);
+            transform:translateY(-2px);
+        }
+
+        .error-icon {
+            font-size:64px;
+            color:#f1c40f;
+            margin-bottom:16px;
+        }
+        .error-card h1 {
+            font-size:72px;
+            font-weight:900;
+            color:#fff;
+            margin:0;
+            line-height:1;
+        }
+        .error-card h2 {
+            font-size:24px;
+            font-weight:700;
+            color:#fff;
+            margin:8px 0;
+        }
+        .error-card p {
+            color:#8899aa;
+            font-size:15px;
+            margin-bottom:24px;
+        }
+
+        .btn-primary {
+            background:linear-gradient(135deg,#6c5ce7,#5a4bd1);
+            color:#fff;
+            border:none;
+            padding:10px 24px;
+            border-radius:12px;
+            font-size:14px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.3s;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            text-decoration:none;
+        }
+        .btn-primary:hover {
+            transform:translateY(-2px);
+            box-shadow:0 8px 24px rgba(108,92,231,0.3);
+        }
+        .btn-secondary {
+            background:rgba(255,255,255,0.05);
+            color:#fff;
+            border:1px solid rgba(255,255,255,0.1);
+            padding:10px 24px;
+            border-radius:12px;
+            font-size:14px;
+            font-weight:500;
+            cursor:pointer;
+            transition:0.3s;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            text-decoration:none;
+        }
+        .btn-secondary:hover { background:rgba(255,255,255,0.1); }
+
+        .error-actions {
+            display:flex;
+            gap:12px;
+            justify-content:center;
+            flex-wrap:wrap;
+        }
+        .error-footer {
+            margin-top:20px;
+            font-size:12px;
+            color:#8899aa;
+        }
+        .error-footer .dot { margin:0 8px; }
+
+        @media (max-width:480px) {
+            .glass-card { padding:28px 20px; }
+            .error-card h1 { font-size:48px; }
+            .error-card h2 { font-size:20px; }
+            .error-icon { font-size:48px; }
+            .error-actions { flex-direction:column; align-items:stretch; }
+            .error-actions .btn-primary,
+            .error-actions .btn-secondary { justify-content:center; }
+        }
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <div class="glass-card error-card">
+        <div class="error-icon">
+            <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <h1 id="errorCode">404</h1>
+        <h2 id="errorTitle">Page Not Found</h2>
+        <p id="errorMessage">The page you are looking for does not exist or has been moved.</p>
+        <div class="error-actions">
+            <a href="/dashboard" class="btn-primary">
+                <i class="fas fa-home"></i> Return to Dashboard
+            </a>
+            <a href="javascript:history.back()" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i> Go Back
+            </a>
+        </div>
+        <div class="error-footer">
+            <span>SX Bans v{{version}}</span>
+            <span class="dot">•</span>
+            <span>Error Code: <span id="errorCodeDisplay">404</span></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code') || '404';
+    const title = urlParams.get('title') || 'Page Not Found';
+    const message = urlParams.get('message') || 'The page you are looking for does not exist or has been moved.';
+
+    document.getElementById('errorCode').textContent = code;
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorCodeDisplay').textContent = code;
+    document.title = `Error ${code} - SX Bans`;
+</script>
+</body>
+</html>

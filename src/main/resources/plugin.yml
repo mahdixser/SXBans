@@ -1,0 +1,164 @@
+name: SXBans
+version: ${project.version}
+main: ir.sxtm.sxbans.SXBans
+api-version: 1.13
+author: xsergod
+description: Advanced punishment system for Minecraft servers
+softdepend: [PlaceholderAPI, Vault, LuckPerms]
+
+commands:
+  ban:
+    description: Ban a player
+    usage: /<command> <player> <reason>
+    aliases: []
+    permission: sxbans.ban
+  tempban:
+    description: Temporarily ban a player
+    usage: /<command> <player> <time> <reason>
+    aliases: [tban]
+    permission: sxbans.ban
+  unban:
+    description: Unban a player
+    usage: /<command> <player>
+    aliases: [pardon]
+    permission: sxbans.unban
+  kick:
+    description: Kick a player
+    usage: /<command> <player> <reason>
+    aliases: []
+    permission: sxbans.kick
+  mute:
+    description: Mute a player
+    usage: /<command> <player> <reason>
+    aliases: []
+    permission: sxbans.mute
+  tempmute:
+    description: Temporarily mute a player
+    usage: /<command> <player> <time> <reason>
+    aliases: [tmute]
+    permission: sxbans.mute
+  unmute:
+    description: Unmute a player
+    usage: /<command> <player>
+    aliases: []
+    permission: sxbans.unmute
+  warn:
+    description: Warn a player
+    usage: /<command> <player> <reason>
+    aliases: []
+    permission: sxbans.warn
+  history:
+    description: View punishment history
+    usage: /<command> <player> [page]
+    aliases: [hist]
+    permission: sxbans.history
+  check:
+    description: Check player status
+    usage: /<command> <player>
+    aliases: [info, status]
+    permission: sxbans.check
+  ipban:
+    description: Ban an IP address
+    usage: /<command> <player/IP> <reason>
+    aliases: []
+    permission: sxbans.ipban
+  ipunban:
+    description: Unban an IP address
+    usage: /<command> <IP>
+    aliases: []
+    permission: sxbans.ipunban
+  ipmute:
+    description: Mute an IP address
+    usage: /<command> <player/IP> <reason>
+    aliases: []
+    permission: sxbans.ipmute
+  ipunmute:
+    description: Unmute an IP address
+    usage: /<command> <IP>
+    aliases: []
+    permission: sxbans.ipunmute
+  sxbans:
+    description: SXBans administration
+    usage: /<command> <reload|stats|web|backup|clear>
+    aliases: [sxban]
+    permission: sxbans.admin
+
+permissions:
+  sxbans.admin:
+    description: Full access to all SXBans features
+    default: false
+  sxbans.ban:
+    description: Ban players
+    default: op
+  sxbans.unban:
+    description: Unban players
+    default: op
+  sxbans.mute:
+    description: Mute players
+    default: op
+  sxbans.unmute:
+    description: Unmute players
+    default: op
+  sxbans.kick:
+    description: Kick players
+    default: op
+  sxbans.warn:
+    description: Warn players
+    default: op
+  sxbans.history:
+    description: View punishment history
+    default: op
+  sxbans.check:
+    description: Check player status
+    default: op
+  sxbans.ipban:
+    description: Ban IP addresses
+    default: op
+  sxbans.ipunban:
+    description: Unban IP addresses
+    default: op
+  sxbans.ipmute:
+    description: Mute IP addresses
+    default: op
+  sxbans.ipunmute:
+    description: Unmute IP addresses
+    default: op
+  sxbans.reload:
+    description: Reload configuration
+    default: op
+  sxbans.web.access:
+    description: Access web panel
+    default: false
+  sxbans.web.admin:
+    description: Admin web panel
+    default: false
+  sxbans.bypass.ban:
+    description: Bypass bans
+    default: op
+  sxbans.bypass.mute:
+    description: Bypass mutes
+    default: op
+  sxbans.bypass.kick:
+    description: Bypass kicks
+    default: op
+  sxbans.bypass.ipban:
+    description: Bypass IP bans
+    default: op
+  sxbans.bypass.ipmute:
+    description: Bypass IP mutes
+    default: op
+  sxbans.appeals.view:
+    description: View ban appeals
+    default: op
+  sxbans.adminlvl.*:
+    description: All admin levels
+    default: op
+  sxbans.adminlvl.1:
+    description: Admin level 1 (lowest)
+    default: op
+  sxbans.adminlvl.50:
+    description: Admin level 50
+    default: false
+  sxbans.adminlvl.100:
+    description: Admin level 100 (highest)
+    default: false

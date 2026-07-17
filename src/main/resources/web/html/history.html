@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - SX Bans</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===== ALL STYLES (همان استایل‌های dashboard) ===== */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-track { background:#1a1a2e; }
+        ::-webkit-scrollbar-thumb { background:#6c5ce7; border-radius:4px; }
+
+        .glass-card {
+            background:rgba(255,255,255,0.05);
+            backdrop-filter:blur(20px);
+            -webkit-backdrop-filter:blur(20px);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:16px;
+            box-shadow:0 8px 32px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.1);
+            transition:all 0.4s ease;
+        }
+        .glass-card:hover {
+            background:rgba(255,255,255,0.06);
+            border-color:rgba(108,92,231,0.3);
+            box-shadow:0 12px 48px rgba(108,92,231,0.15);
+            transform:translateY(-2px);
+        }
+
+        .app-container { display:flex; min-height:100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width:220px;
+            background:rgba(10,10,26,0.9);
+            backdrop-filter:blur(20px);
+            border-right:1px solid rgba(255,255,255,0.1);
+            padding:20px 0;
+            display:flex;
+            flex-direction:column;
+            position:fixed;
+            top:0;
+            left:0;
+            bottom:0;
+            z-index:100;
+        }
+        .sidebar-header { padding:0 20px 20px; border-bottom:1px solid rgba(255,255,255,0.1); }
+        .logo-small { display:flex; align-items:center; gap:12px; font-size:20px; font-weight:800; color:#fff; }
+        .logo-small i { color:#6c5ce7; font-size:24px; }
+
+        .nav-menu { list-style:none; padding:16px 12px; flex:1; overflow-y:auto; }
+        .nav-item { margin-bottom:4px; }
+        .nav-item a {
+            display:flex;
+            align-items:center;
+            gap:12px;
+            padding:10px 14px;
+            border-radius:12px;
+            color:#8899aa;
+            text-decoration:none;
+            transition:0.3s;
+            font-weight:500;
+            font-size:14px;
+        }
+        .nav-item a i { width:20px; text-align:center; }
+        .nav-item a:hover { background:rgba(108,92,231,0.1); color:#fff; }
+        .nav-item.active a { background:rgba(108,92,231,0.2); color:#6c5ce7; }
+
+        .sidebar-footer {
+            padding:16px 20px;
+            border-top:1px solid rgba(255,255,255,0.1);
+        }
+        .user-info { display:flex; align-items:center; gap:12px; }
+        .user-avatar { width:36px; height:36px; border-radius:50%; border:2px solid #6c5ce7; }
+        .user-name { font-size:14px; font-weight:600; }
+        .user-level { font-size:12px; color:#8899aa; }
+        .logout-btn {
+            background:none;
+            border:none;
+            color:#8899aa;
+            cursor:pointer;
+            font-size:18px;
+            padding:8px;
+            border-radius:8px;
+            margin-left:auto;
+            transition:0.3s;
+        }
+        .logout-btn:hover { color:#e74c3c; background:rgba(231,76,60,0.1); }
+
+        .main-content { margin-left:220px; flex:1; padding:20px; min-height:100vh; }
+
+        .top-bar {
+            padding:14px 20px;
+            border-radius:16px;
+            margin-bottom:20px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:12px;
+            background:rgba(10,10,26,0.6);
+            backdrop-filter:blur(20px);
+            border:1px solid rgba(255,255,255,0.1);
+        }
+        .page-title h2 { font-size:20px; font-weight:700; }
+        .page-title .subtitle { font-size:13px; color:#8899aa; }
+        .top-bar-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+
+        .filters { display:flex; gap:8px; }
+        .filters select {
+            background:#1a1a2e;
+            border:1px solid rgba(255,255,255,0.1);
+            border-radius:8px;
+            padding:6px 12px;
+            color:#fff;
+            font-size:13px;
+            cursor:pointer;
+            font-family:inherit;
+        }
+        .filters select:focus { outline:none; border-color:#6c5ce7; }
+
+        .refresh-btn {
+            background:none;
+            border:none;
+            color:#8899aa;
+            cursor:pointer;
+            font-size:18px;
+            padding:8px;
+            border-radius:8px;
+            transition:0.3s;
+        }
+        .refresh-btn:hover { color:#fff; background:rgba(255,255,255,0.05); }
+
+        .btn-primary {
+            background:linear-gradient(135deg,#6c5ce7,#5a4bd1);
+            color:#fff;
+            border:none;
+            padding:8px 20px;
+            border-radius:12px;
+            font-size:14px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.3s;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+        }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(108,92,231,0.3); }
+        .btn-secondary {
+            background:rgba(255,255,255,0.05);
+            color:#fff;
+            border:1px solid rgba(255,255,255,0.1);
+            padding:8px 20px;
+            border-radius:12px;
+            font-size:14px;
+            font-weight:500;
+            cursor:pointer;
+            transition:0.3s;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+        }
+        .btn-secondary:hover { background:rgba(255,255,255,0.1); }
+
+        .history-section { padding:24px; }
+        .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+        .section-header h3 { font-size:18px; font-weight:600; }
+
+        .table-container { overflow-x:auto; }
+        .history-table {
+            width:100%;
+            border-collapse:collapse;
+            font-size:14px;
+            min-width:600px;
+        }
+        .history-table th,
+        .history-table td {
+            padding:10px 14px;
+            text-align:left;
+            border-bottom:1px solid rgba(255,255,255,0.05);
+        }
+        .history-table th {
+            font-size:12px;
+            font-weight:600;
+            text-transform:uppercase;
+            color:#8899aa;
+        }
+        .history-table tr:hover { background:rgba(255,255,255,0.02); }
+
+        .type-badge {
+            padding:3px 10px;
+            border-radius:20px;
+            font-size:11px;
+            font-weight:600;
+            display:inline-block;
+        }
+        .type-badge.type-BAN { background:rgba(231,76,60,0.2); color:#e74c3c; }
+        .type-badge.type-TEMP_BAN { background:rgba(231,76,60,0.2); color:#e74c3c; }
+        .type-badge.type-MUTE { background:rgba(241,196,15,0.2); color:#f1c40f; }
+        .type-badge.type-TEMP_MUTE { background:rgba(241,196,15,0.2); color:#f1c40f; }
+        .type-badge.type-WARN { background:rgba(52,152,219,0.2); color:#3498db; }
+        .type-badge.type-KICK { background:rgba(155,89,182,0.2); color:#9b59b6; }
+        .type-badge.type-IP_BAN { background:rgba(231,76,60,0.2); color:#e74c3c; }
+        .type-badge.type-IP_MUTE { background:rgba(241,196,15,0.2); color:#f1c40f; }
+
+        .status-badge {
+            padding:3px 10px;
+            border-radius:20px;
+            font-size:11px;
+            font-weight:600;
+            display:inline-block;
+        }
+        .status-badge.status-ACTIVE { background:rgba(0,184,148,0.2); color:#00b894; }
+        .status-badge.status-EXPIRED { background:rgba(136,153,170,0.2); color:#8899aa; }
+        .status-badge.status-REMOVED { background:rgba(231,76,60,0.2); color:#e74c3c; }
+
+        .pagination-container {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:12px;
+            padding:12px 0;
+            margin-top:16px;
+        }
+        .page-btn {
+            background:#1a1a2e;
+            border:1px solid rgba(255,255,255,0.1);
+            color:#fff;
+            padding:6px 14px;
+            border-radius:12px;
+            cursor:pointer;
+            transition:0.3s;
+        }
+        .page-btn:hover:not(:disabled) { background:#6c5ce7; }
+        .page-btn:disabled { opacity:0.3; cursor:not-allowed; }
+        .page-info { font-size:13px; color:#8899aa; }
+
+        .text-center { text-align:center; }
+        .loading-spinner {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            padding:40px;
+            gap:10px;
+        }
+        .loading-spinner i { font-size:28px; color:#6c5ce7; }
+        .loading-spinner span { color:#8899aa; font-size:13px; }
+
+        @media (max-width:768px) {
+            .sidebar { width:60px; }
+            .sidebar .logo-small span,
+            .sidebar .nav-item span,
+            .sidebar .user-info>div,
+            .sidebar .user-level { display:none; }
+            .sidebar .logo-small { justify-content:center; }
+            .sidebar .nav-item a { justify-content:center; padding:12px; }
+            .main-content { margin-left:60px; padding:12px; }
+            .top-bar { flex-direction:column; align-items:stretch; }
+            .filters { flex-wrap:wrap; }
+        }
+        @media (max-width:480px) {
+            .history-table { font-size:12px; min-width:400px; }
+            .history-table th, .history-table td { padding:6px 8px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-small">
+                <i class="fas fa-shield-halved"></i>
+                <span>SX Bans</span>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="/dashboard"><i class="fas fa-chart-pie"></i><span>Dashboard</span></a></li>
+            <li class="nav-item"><a href="/players"><i class="fas fa-users"></i><span>Players</span></a></li>
+            <li class="nav-item active"><a href="/history"><i class="fas fa-clock-rotate-left"></i><span>History</span></a></li>
+            <li class="nav-item"><a href="/settings"><i class="fas fa-gear"></i><span>Settings</span></a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <img src="https://crafatar.com/avatars/{{uuid}}?size=32" alt="User" class="user-avatar">
+                <div>
+                    <span class="user-name">{{username}}</span>
+                    <span class="user-level">Level {{user_level}}</span>
+                </div>
+            </div>
+            <button onclick="logout()" class="logout-btn">
+                <i class="fas fa-right-from-bracket"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="page-title">
+                <h2>Punishment History</h2>
+                <span class="subtitle">Complete record of all punishments</span>
+            </div>
+            <div class="top-bar-actions">
+                <div class="filters">
+                    <select id="typeFilter" onchange="loadHistory(1)">
+                        <option value="">All Types</option>
+                        <option value="BAN">Ban</option>
+                        <option value="TEMP_BAN">Temp Ban</option>
+                        <option value="MUTE">Mute</option>
+                        <option value="TEMP_MUTE">Temp Mute</option>
+                        <option value="WARN">Warning</option>
+                        <option value="KICK">Kick</option>
+                        <option value="IP_BAN">IP Ban</option>
+                        <option value="IP_MUTE">IP Mute</option>
+                        <option value="IP_KICK">IP Kick</option>
+                    </select>
+                    <select id="statusFilter" onchange="loadHistory(1)">
+                        <option value="">All Status</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="EXPIRED">Expired</option>
+                        <option value="REMOVED">Removed</option>
+                    </select>
+                </div>
+                <button class="refresh-btn" onclick="loadHistory(1)"><i class="fas fa-rotate"></i></button>
+            </div>
+        </header>
+
+        <section class="history-section glass-card">
+            <!-- Bans -->
+            <div style="margin-bottom:24px;">
+                <h3 style="color:#e74c3c;margin-bottom:10px;"><i class="fas fa-ban"></i> Bans</h3>
+                <div class="table-container">
+                    <table class="history-table">
+                        <thead><tr><th>Executor</th><th>Player</th><th>Reason</th><th>Duration</th><th>Date</th><th>Server</th><th>Status</th></tr></thead>
+                        <tbody id="banTableBody"><tr><td colspan="7" class="text-center">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Mutes -->
+            <div style="margin-bottom:24px;">
+                <h3 style="color:#f1c40f;margin-bottom:10px;"><i class="fas fa-volume-xmark"></i> Mutes</h3>
+                <div class="table-container">
+                    <table class="history-table">
+                        <thead><tr><th>Executor</th><th>Player</th><th>Reason</th><th>Duration</th><th>Date</th><th>Server</th><th>Status</th></tr></thead>
+                        <tbody id="muteTableBody"><tr><td colspan="7" class="text-center">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Warnings -->
+            <div style="margin-bottom:24px;">
+                <h3 style="color:#3498db;margin-bottom:10px;"><i class="fas fa-triangle-exclamation"></i> Warnings</h3>
+                <div class="table-container">
+                    <table class="history-table">
+                        <thead><tr><th>Executor</th><th>Player</th><th>Reason</th><th>Date</th><th>Server</th><th>Status</th></tr></thead>
+                        <tbody id="warnTableBody"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Kicks -->
+            <div style="margin-bottom:24px;">
+                <h3 style="color:#9b59b6;margin-bottom:10px;"><i class="fas fa-door-open"></i> Kicks</h3>
+                <div class="table-container">
+                    <table class="history-table">
+                        <thead><tr><th>Executor</th><th>Player</th><th>Reason</th><th>Date</th><th>Server</th><th>Status</th></tr></thead>
+                        <tbody id="kickTableBody"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- IP Bans -->
+            <div style="margin-bottom:24px;">
+                <h3 style="color:#e74c3c;margin-bottom:10px;"><i class="fas fa-ban"></i> IP Bans</h3>
+                <div class="table-container">
+                    <table class="history-table">
+                        <thead><tr><th>Executor</th><th>IP</th><th>Reason</th><th>Date</th><th>Server</th><th>Status</th></tr></thead>
+                        <tbody id="ipBanTableBody"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- IP Mutes -->
+            <div>
+                <h3 style="color:#f1c40f;margin-bottom:10px;"><i class="fas fa-volume-xmark"></i> IP Mutes</h3>
+                <div class="table-container">
+                    <table class="history-table">
+                        <thead><tr><th>Executor</th><th>IP</th><th>Reason</th><th>Date</th><th>Server</th><th>Status</th></tr></thead>
+                        <tbody id="ipMuteTableBody"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pagination-container" id="historyPagination">
+                <button class="page-btn" onclick="changeHistoryPage('prev')"><i class="fas fa-chevron-left"></i></button>
+                <span class="page-info" id="historyPageInfo">Page 1 of 1</span>
+                <button class="page-btn" onclick="changeHistoryPage('next')"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+    let historyPage = 1, historyTotalPages = 1;
+
+    function logout() { localStorage.clear(); window.location.href = '/login'; }
+
+    function renderTable(tbodyId, items, hasDuration) {
+        const tbody = document.getElementById(tbodyId);
+        if (!items || items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="${hasDuration ? 7 : 6}" class="text-center">No records found</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = items.map(p => `
+            <tr>
+                <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <img src="https://crafatar.com/avatars/${p.executorUuid || '00000000-0000-0000-0000-000000000000'}?size=32" style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);">
+                        <span style="font-size:12px;">${p.executorName || 'Unknown'}</span>
+                    </div>
+                </td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <img src="https://crafatar.com/avatars/${p.playerUuid || '00000000-0000-0000-0000-000000000000'}?size=32" style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);">
+                        <span style="font-size:12px;">${p.playerName || p.ip || 'Unknown'}</span>
+                    </div>
+                </td>
+                <td style="font-size:13px;">${p.reason || '-'}</td>
+                ${hasDuration ? `<td style="font-size:12px;color:#8899aa;">${p.duration > 0 ? p.duration + 'd' : 'Permanent'}</td>` : ''}
+                <td style="font-size:12px;color:#8899aa;">${p.createdAt ? new Date(p.createdAt).toLocaleDateString() : '-'}</td>
+                <td style="font-size:12px;color:#8899aa;">${p.server || 'Global'}</td>
+                <td><span class="status-badge status-${p.status}">${p.status || 'ACTIVE'}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    async function loadHistory(page = 1) {
+        const type = document.getElementById('typeFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        try {
+            const response = await fetch(`/api/punishments?page=${page}&limit=50&type=${type}&status=${status}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (data.success) {
+                const all = data.punishments || [];
+                renderTable('banTableBody', all.filter(p => p.type === 'BAN' || p.type === 'TEMP_BAN'), true);
+                renderTable('muteTableBody', all.filter(p => p.type === 'MUTE' || p.type === 'TEMP_MUTE'), true);
+                renderTable('warnTableBody', all.filter(p => p.type === 'WARN'), false);
+                renderTable('kickTableBody', all.filter(p => p.type === 'KICK' || p.type === 'IP_KICK'), false);
+                renderTable('ipBanTableBody', all.filter(p => p.type === 'IP_BAN'), false);
+                renderTable('ipMuteTableBody', all.filter(p => p.type === 'IP_MUTE'), false);
+                historyPage = data.page;
+                historyTotalPages = data.totalPages;
+                document.getElementById('historyPageInfo').textContent = `Page ${data.page} of ${data.totalPages}`;
+                const btns = document.querySelectorAll('#historyPagination .page-btn');
+                if (btns.length >= 2) { btns[0].disabled = data.page <= 1; btns[1].disabled = data.page >= data.totalPages; }
+            }
+        } catch (error) { console.error('Error loading history:', error); }
+    }
+
+    function changeHistoryPage(direction) {
+        if (direction === 'prev' && historyPage > 1) loadHistory(historyPage - 1);
+        else if (direction === 'next' && historyPage < historyTotalPages) loadHistory(historyPage + 1);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => loadHistory());
+</script>
+</body>
+</html>

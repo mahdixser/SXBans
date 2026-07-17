@@ -1,0 +1,373 @@
+package ir.sxtm.sxbans.utils;
+
+import ir.sxtm.sxbans.SXBans;
+import ir.sxtm.sxbans.config.ConfigManager;
+
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+/**
+ * Advanced logging system for SX Bans.
+ * Supports console, file, database, and web logging.
+ */
+public class SXBansLogger {
+    private final SXBans plugin;
+    private final java.util.logging.Logger bukkitLogger;
+    private final File logFile;
+    private final SimpleDateFormat dateFormat;
+    private final ConcurrentLinkedQueue<String> logQueue;
+    private boolean fileLogging;
+    private boolean consoleLogging;
+    private boolean webLogging;
+    private Thread logThread;
+    private volatile boolean running;
+
+    public SXBansLogger(SXBans plugin) {
+        this.plugin = plugin;
+        this.bukkitLogger = plugin.getLogger();
+        this.dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        this.logQueue = new ConcurrentLinkedQueue<>();
+        this.logFile = new File(plugin.getDataFolder(), "logs" + File.separator + "sxbans.log");
+        this.running = true;
+
+        // Load settings with null check - ConfigManager might not be ready yet
+        ConfigManager configManager = plugin.getConfigManager();
+        if (configManager != null) {
+            try {
+                this.consoleLogging = configManager.isConsoleLogging();
+                this.fileLogging = configManager.isFileLogging();
+                this.webLogging = configManager.isWebLogging();
+            } catch (Exception e) {
+                // If there's any error reading config, use defaults
+                this.consoleLogging = true;
+                this.fileLogging = true;
+                this.webLogging = true;
+            }
+        } else {
+            // Default values if ConfigManager is not ready
+            this.consoleLogging = true;
+            this.fileLogging = true;
+            this.webLogging = true;
+        }
+
+        // Create logs directory
+        logFile.getParentFile().mkdirs();
+
+        // Start log processor thread
+        startLogProcessor();
+    }
+
+    /**
+     * Start the log processor thread.
+     */
+    private void startLogProcessor() {
+        logThread = new Thread(() -> {
+            while (running) {
+                try {
+                    String log = logQueue.poll();
+                    if (log != null) {
+                        processLog(log);
+                    } else {
+                        Thread.sleep(100);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (Exception e) {
+                    bukkitLogger.warning("Error processing log: " + e.getMessage());
+                }
+            }
+        }, "SXBans-Logger");
+        logThread.setDaemon(true);
+        logThread.start();
+    }
+
+    /**
+     * Process a single log entry.
+     */
+    private void processLog(String log) {
+        // Console logging
+        if (consoleLogging) {
+            bukkitLogger.info(log);
+        }
+
+        // File logging
+        if (fileLogging) {
+            writeToFile(log);
+        }
+
+        // Web logging
+        if (webLogging) {
+            sendToWeb(log);
+        }
+    }
+
+    /**
+     * Write log to file.
+     */
+    private void writeToFile(String log) {
+        try (FileWriter fw = new FileWriter(logFile, true);
+             BufferedWriter bw = new BufferedWriter(fw);
+             PrintWriter out = new PrintWriter(bw)) {
+            out.println(log);
+        } catch (IOException e) {
+            bukkitLogger.warning("Failed to write to log file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Send log to web panel.
+     */
+    private void sendToWeb(String log) {
+        // Send via WebSocket if available
+        if (plugin.getWebServer() != null && plugin.getWebServer().isRunning()) {
+            // This would be sent to WebSocket clients
+        }
+    }
+
+    /**
+     * Log an info message.
+     *
+     * @param message The message
+     */
+    public void info(String message) {
+        String log = formatLog("INFO", message);
+        logQueue.offer(log);
+    }
+
+    /**
+     * Log a warning message.
+     *
+     * @param message The message
+     */
+    public void warning(String message) {
+        String log = formatLog("WARN", message);
+        logQueue.offer(log);
+    }
+
+    /**
+     * Log a severe message.
+     *
+     * @param message The message
+     */
+    public void severe(String message) {
+        String log = formatLog("ERROR", message);
+        logQueue.offer(log);
+    }
+
+    /**
+     * Log a debug message.
+     *
+     * @param message The message
+     */
+    public void debug(String message) {
+        // Check if debug is enabled - with null check
+        boolean debugEnabled = false;
+        try {
+            ConfigManager configManager = plugin.getConfigManager();
+            if (configManager != null) {
+                debugEnabled = configManager.getBoolean("debug", false);
+            }
+        } catch (Exception e) {
+            // If config is not ready, debug is disabled
+            debugEnabled = false;
+        }
+
+        if (debugEnabled) {
+            String log = formatLog("DEBUG", message);
+            logQueue.offer(log);
+        }
+    }
+
+    /**
+     * Log an exception.
+     *
+     * @param message The message
+     * @param e The exception
+     */
+    public void error(String message, Throwable e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        String log = formatLog("ERROR", message + "\n" + sw.toString());
+        logQueue.offer(log);
+    }
+
+    /**
+     * Log a punishment event.
+     *
+     * @param type The event type
+     * @param details The event details
+     */
+    public void logPunishment(String type, String details) {
+        String log = formatLog("PUNISHMENT", type + " - " + details);
+        logQueue.offer(log);
+    }
+
+    /**
+     * Log a web event.
+     *
+     * @param type The event type
+     * @param details The event details
+     */
+    public void logWeb(String type, String details) {
+        String log = formatLog("WEB", type + " - " + details);
+        logQueue.offer(log);
+    }
+
+    /**
+     * Format a log message.
+     */
+    private String formatLog(String level, String message) {
+        String timestamp = dateFormat.format(new Date());
+        return String.format("[%s] [SXBans/%s] %s", timestamp, level, message);
+    }
+
+    /**
+     * Get the log file.
+     *
+     * @return The log file
+     */
+    public File getLogFile() {
+        return logFile;
+    }
+
+    /**
+     * Read recent logs from file.
+     *
+     * @param lines Number of lines to read
+     * @return List of log lines
+     */
+    public java.util.List<String> getRecentLogs(int lines) {
+        java.util.List<String> recent = new java.util.ArrayList<>();
+
+        if (!logFile.exists()) return recent;
+
+        try (RandomAccessFile raf = new RandomAccessFile(logFile, "r")) {
+            long fileLength = raf.length();
+            if (fileLength == 0) return recent;
+
+            // Start from the end
+            long pos = fileLength - 1;
+            int linesRead = 0;
+            StringBuilder line = new StringBuilder();
+
+            while (pos >= 0 && linesRead < lines) {
+                raf.seek(pos);
+                char c = (char) raf.readByte();
+
+                if (c == '\n') {
+                    if (line.length() > 0) {
+                        recent.add(0, line.reverse().toString());
+                        line.setLength(0);
+                        linesRead++;
+                    }
+                } else if (c != '\r') {
+                    line.append(c);
+                }
+                pos--;
+            }
+
+            if (line.length() > 0 && linesRead < lines) {
+                recent.add(0, line.reverse().toString());
+            }
+
+        } catch (IOException e) {
+            bukkitLogger.warning("Failed to read recent logs: " + e.getMessage());
+        }
+
+        return recent;
+    }
+
+    /**
+     * Clear the log file.
+     */
+    public void clearLogs() {
+        try {
+            new FileWriter(logFile, false).close();
+            info("Log file cleared");
+        } catch (IOException e) {
+            warning("Failed to clear log file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Shutdown the logger.
+     */
+    public void shutdown() {
+        running = false;
+        if (logThread != null) {
+            logThread.interrupt();
+            try {
+                logThread.join(5000);
+            } catch (InterruptedException ignored) {}
+        }
+
+        // Process remaining logs
+        String log;
+        while ((log = logQueue.poll()) != null) {
+            if (consoleLogging) {
+                bukkitLogger.info(log);
+            }
+            if (fileLogging) {
+                writeToFile(log);
+            }
+        }
+    }
+
+    /**
+     * Check if console logging is enabled.
+     *
+     * @return true if enabled
+     */
+    public boolean isConsoleLogging() {
+        return consoleLogging;
+    }
+
+    /**
+     * Check if file logging is enabled.
+     *
+     * @return true if enabled
+     */
+    public boolean isFileLogging() {
+        return fileLogging;
+    }
+
+    /**
+     * Check if web logging is enabled.
+     *
+     * @return true if enabled
+     */
+    public boolean isWebLogging() {
+        return webLogging;
+    }
+
+    /**
+     * Set console logging.
+     *
+     * @param enabled true to enable
+     */
+    public void setConsoleLogging(boolean enabled) {
+        this.consoleLogging = enabled;
+    }
+
+    /**
+     * Set file logging.
+     *
+     * @param enabled true to enable
+     */
+    public void setFileLogging(boolean enabled) {
+        this.fileLogging = enabled;
+    }
+
+    /**
+     * Set web logging.
+     *
+     * @param enabled true to enable
+     */
+    public void setWebLogging(boolean enabled) {
+        this.webLogging = enabled;
+    }
+}

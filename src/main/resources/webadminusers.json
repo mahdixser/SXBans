@@ -1,0 +1,18 @@
+// You can hash your password using this website: https://bcrypt-generator.com/
+
+
+{
+  "users": {
+    "admin": {
+      "username": "admin",
+      "passwordHash": "$2a$10$Nk8ZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZq",
+      "level": 100,
+      "permissions": ["*"],
+      "enabled": true,
+      "createdAt": 1700000000000,
+      "lastLogin": 1700000000000,
+      "sessionToken": null,
+      "sessionExpiry": 0
+    }
+  }
+}

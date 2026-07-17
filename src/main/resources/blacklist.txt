@@ -1,0 +1,7 @@
+# SX Bans Blacklist
+# Add usernames to blacklist, one per line
+# Players on this list will be prevented from joining
+
+# Example:
+# hacker123
+# griefer456

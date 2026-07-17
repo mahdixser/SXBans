@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SX Bans Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET & BASE ===== */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* ===== LOGIN CONTAINER ===== */
+        .login-container { width:100%; max-width:420px; }
+
+        /* ===== GLASS CARD ===== */
+        .glass-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+            padding: 32px 28px;
+            transition: all 0.4s ease;
+        }
+        .glass-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(108,92,231,0.3);
+            box-shadow: 0 12px 48px rgba(108,92,231,0.15);
+            transform: translateY(-2px);
+        }
+
+        /* ===== LOGIN HEADER ===== */
+        .login-header { text-align:center; margin-bottom:28px; }
+        .logo-icon { font-size:40px; color:#6c5ce7; }
+        .login-header h1 { font-size:26px; font-weight:800; margin:4px 0; }
+        .login-header .subtitle { color:#8899aa; font-size:14px; }
+        .version {
+            font-size:12px;
+            color:#8899aa;
+            background:rgba(255,255,255,0.05);
+            padding:2px 12px;
+            border-radius:20px;
+        }
+
+        /* ===== FORM ===== */
+        .form-group {
+            position:relative;
+            margin-bottom:14px;
+        }
+        .form-group i {
+            position:absolute;
+            left:16px;
+            top:50%;
+            transform:translateY(-50%);
+            color:#8899aa;
+        }
+        .form-group input {
+            width:100%;
+            padding:14px 16px 14px 48px;
+            border:1px solid rgba(255,255,255,0.1);
+            border-radius:12px;
+            background:rgba(0,0,0,0.3);
+            color:#fff;
+            font-size:14px;
+            font-family:inherit;
+            transition:0.3s;
+        }
+        .form-group input:focus {
+            outline:none;
+            border-color:#6c5ce7;
+            box-shadow:0 0 0 3px rgba(108,92,231,0.1);
+        }
+        .form-group input::placeholder { color:#556677; }
+
+        .toggle-password {
+            position:absolute;
+            right:16px;
+            top:50%;
+            transform:translateY(-50%);
+            background:none;
+            border:none;
+            color:#8899aa;
+            cursor:pointer;
+            font-size:16px;
+        }
+
+        /* ===== BUTTON ===== */
+        .btn-primary {
+            width:100%;
+            padding:12px;
+            background:linear-gradient(135deg,#6c5ce7,#5a4bd1);
+            color:#fff;
+            border:none;
+            border-radius:12px;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.3s;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+        }
+        .btn-primary:hover {
+            transform:translateY(-2px);
+            box-shadow:0 8px 24px rgba(108,92,231,0.3);
+        }
+
+        /* ===== ERROR ===== */
+        .error-message {
+            background:rgba(231,76,60,0.1);
+            color:#e74c3c;
+            padding:10px 14px;
+            border-radius:12px;
+            font-size:13px;
+            display:none;
+            margin-bottom:14px;
+            text-align:center;
+        }
+
+        /* ===== FOOTER ===== */
+        .login-footer {
+            text-align:center;
+            font-size:12px;
+            color:#8899aa;
+            margin-top:16px;
+        }
+        .login-footer .dot { margin:0 8px; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width:480px) {
+            .glass-card { padding:24px 18px; }
+            .login-header h1 { font-size:22px; }
+            .logo-icon { font-size:32px; }
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="glass-card login-card">
+        <div class="login-header">
+            <div class="logo-container">
+                <i class="fas fa-shield-halved logo-icon"></i>
+                <h1>SX Bans</h1>
+                <span class="version">v{{version}}</span>
+            </div>
+            <p class="subtitle">Advanced Punishment Management System</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" placeholder="Username" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Password" required autocomplete="current-password">
+                <button type="button" class="toggle-password" onclick="togglePassword()">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+
+            <div id="errorMessage" class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText">Invalid username or password</span>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
+
+            <div class="login-footer">
+                <span>SX Bans Punishment System</span>
+                <span class="dot">•</span>
+                <span>Version {{version}}</span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById('password');
+        const icon = document.querySelector('.toggle-password i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+
+        errorDiv.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('userLevel', data.level);
+                document.cookie = `session=${data.token}; path=/; max-age=86400`;
+                window.location.href = '/dashboard';
+            } else {
+                errorText.textContent = data.message || 'Invalid credentials';
+                errorDiv.style.display = 'block';
+            }
+        } catch (error) {
+            errorText.textContent = 'Connection error';
+            errorDiv.style.display = 'block';
+            console.error('Login error:', error);
+        }
+    });
+
+    // Check if already logged in
+    const token = localStorage.getItem('token');
+    if (token) {
+        fetch('/api/auth/validate', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.valid) window.location.href = '/dashboard';
+        })
+        .catch(() => {});
+    }
+</script>
+</body>
+</html>

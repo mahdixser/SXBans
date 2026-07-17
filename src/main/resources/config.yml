@@ -1,0 +1,178 @@
+# SX Bans Configuration
+# Advanced punishment system for Minecraft servers
+
+# -------------------------------------------------------------------
+# DATABASE SETTINGS
+# -------------------------------------------------------------------
+database:
+  # Database type: json, mysql, sqlite, postgresql, h2
+  type: json
+
+  # MySQL / PostgreSQL settings
+  host: localhost
+  port: 3306
+  name: sxbans
+  username: root
+  password: ''
+
+  # Connection pool settings
+  pool:
+    max-size: 20
+    min-idle: 5
+    connection-timeout: 30000
+    idle-timeout: 600000
+    max-lifetime: 1800000
+
+# -------------------------------------------------------------------
+# REDIS SETTINGS (for cross-server communication)
+# -------------------------------------------------------------------
+redis:
+  enabled: false
+  host: localhost
+  port: 6379
+  password: ''
+  database: 0
+
+# -------------------------------------------------------------------
+# WEB SERVER SETTINGS
+# -------------------------------------------------------------------
+web:
+  enabled: true
+  host: 0.0.0.0
+  port: 8080
+
+  # SSL configuration
+  ssl:
+    enabled: false
+    keystore: ''
+    password: ''
+
+  # Session settings
+  session:
+    timeout: 86400  # 24 hours in seconds
+
+# -------------------------------------------------------------------
+# PUNISHMENT SETTINGS
+# -------------------------------------------------------------------
+punishments:
+  # Maximum warnings before auto-ban
+  max-warnings: 5
+
+  # Warning expiry time in milliseconds (30 days default)
+  warning-expiry: 2592000000
+
+  # Auto-ban settings
+  auto-ban:
+    enabled: true
+    ban-duration: 86400000  # 1 day in milliseconds
+    reason: '&cAuto-banned for reaching maximum warnings'
+
+  # Default durations (in milliseconds)
+  default-durations:
+    temp-ban: 86400000  # 1 day
+    temp-mute: 3600000  # 1 hour
+
+  # Broadcast settings
+  broadcast:
+    ban: true
+    temp-ban: true
+    mute: true
+    temp-mute: true
+    kick: true
+    warn: true
+    ipban: true
+    ipmute: true
+
+# -------------------------------------------------------------------
+# ALT ACCOUNT DETECTION SETTINGS
+# -------------------------------------------------------------------
+alt-detection:
+  enabled: true
+  cache-duration: 60000  # 1 minute
+  max-ips: 5
+  notify-staff: true
+  notify-permission: 'sxbans.alts.notify'
+  auto-flag: true
+  auto-flag-warnings: 3
+
+# -------------------------------------------------------------------
+# LOGGING SETTINGS
+# -------------------------------------------------------------------
+logging:
+  # Console logging
+  console: true
+
+  # File logging
+  file: true
+  file-format: json  # json or plain
+
+  # Web logging (send logs to web panel)
+  web: true
+
+  # Discord webhook logging
+  discord:
+    enabled: false
+    webhook-url: ''
+    events:
+      punishment: true
+      removal: true
+      appeal: true
+      banwave: true
+
+# -------------------------------------------------------------------
+# APPEAL SETTINGS
+# -------------------------------------------------------------------
+appeal:
+  enabled: true
+  cooldown: 604800000  # 7 days in milliseconds
+  max-per-player: 3
+  notify-staff: true
+  staff-permission: 'sxbans.appeals.view'
+  auto-approve:
+    enabled: false
+    required-level: 50
+
+# -------------------------------------------------------------------
+# BAN WAVE SETTINGS
+# -------------------------------------------------------------------
+banwave:
+  enabled: true
+  notify-staff: true
+  staff-permission: 'sxbans.banwave.notify'
+  max-players: 50
+  default-duration: 604800000  # 7 days
+
+# -------------------------------------------------------------------
+# CONNECTION SETTINGS
+# -------------------------------------------------------------------
+connection:
+  # Max connections per IP
+  max-per-ip: 3
+
+  # Blacklist file
+  blacklist:
+    enabled: true
+    file: blacklist.txt
+
+# -------------------------------------------------------------------
+# MUTE FILTER SETTINGS
+# -------------------------------------------------------------------
+mute:
+  # Wildcard mute (mute players containing this name)
+  wildcard-enabled: false
+  wildcard-name: ''
+
+  # Word filter
+  filter-enabled: true
+  filter-words: 'hack,cheat,exploit,bypass'
+
+# -------------------------------------------------------------------
+# DEBUG SETTINGS
+# -------------------------------------------------------------------
+debug: false
+
+# -------------------------------------------------------------------
+# MESSAGES PREFIX
+# -------------------------------------------------------------------
+messages:
+  prefix: '&8[&6SXBans&8] &7'

@@ -1,0 +1,183 @@
+# SX Bans Messages Configuration
+# All messages are customizable with color codes (&)
+# Support for hover messages with &h format
+
+# -------------------------------------------------------------------
+# BROADCAST MESSAGES WITH HOVER SUPPORT & PERMISSION
+# -------------------------------------------------------------------
+broadcast:
+  ban:
+    message: '&c%player% &7was banned by &c%executor%'
+    broadcast_to_everyone: false
+    permission: 'sxbans.admin.punishview.ban'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7Player: &f%player%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Duration: &f%duration%'
+      - '&7Date: &f%date%'
+      - '&7Server: &f%server%'
+      - '&6&l========================'
+
+  tempban:
+    message: '&c%player% &7was temporarily banned by &c%executor% &7(%duration%)'
+    broadcast_to_everyone: true
+    permission: 'sxbans.admin.punishview.tempban'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7Player: &f%player%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Duration: &f%duration%'
+      - '&7Expires: &f%expires%'
+      - '&7Date: &f%date%'
+      - '&7Server: &f%server%'
+      - '&6&l========================'
+
+  unban:
+    message: '&a%player% &7was unbanned by &a%executor%'
+    broadcast_to_everyone: true
+    permission: 'sxbans.admin.punishview.unban'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7Player: &f%player%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Date: &f%date%'
+      - '&6&l========================'
+
+  mute:
+    message: '&c%player% &7was muted by &c%executor%'
+    broadcast_to_everyone: false
+    permission: 'sxbans.admin.punishview.mute'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7Player: &f%player%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Duration: &f%duration%'
+      - '&7Date: &f%date%'
+      - '&7Server: &f%server%'
+      - '&6&l========================'
+
+  tempmute:
+    message: '&c%player% &7was temporarily muted by &c%executor% &7(%duration%)'
+    broadcast_to_everyone: true
+    permission: 'sxbans.admin.punishview.tempmute'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7Player: &f%player%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Duration: &f%duration%'
+      - '&7Expires: &f%expires%'
+      - '&7Date: &f%date%'
+      - '&7Server: &f%server%'
+      - '&6&l========================'
+
+  unmute:
+    message: '&a%player% &7was unmuted by &a%executor%'
+    broadcast_to_everyone: true
+    permission: 'sxbans.admin.punishview.unmute'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7Player: &f%player%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Date: &f%date%'
+      - '&6&l========================'
+
+  kick:
+    message: '&c%player% &7was kicked by &c%executor%'
+    broadcast_to_everyone: false
+    permission: 'sxbans.admin.punishview.kick'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7Player: &f%player%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Date: &f%date%'
+      - '&7Server: &f%server%'
+      - '&6&l========================'
+
+  ipkick:
+    message: '&c%player% &7was IP kicked by &c%executor%'
+    broadcast_to_everyone: false
+    permission: 'sxbans.admin.punishview.ipkick'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7Player: &f%player%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Date: &f%date%'
+      - '&7Server: &f%server%'
+      - '&6&l========================'
+
+  warn:
+    message: '&c%player% &7was warned by &c%executor%'
+    broadcast_to_everyone: false
+    permission: 'sxbans.admin.punishview.warn'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7Player: &f%player%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Date: &f%date%'
+      - '&7Server: &f%server%'
+      - '&6&l========================'
+
+  ipban:
+    message: '&cIP %ip% &7was banned by &c%executor%'
+    broadcast_to_everyone: false
+    permission: 'sxbans.admin.punishview.ipban'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7IP: &f%ip%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Date: &f%date%'
+      - '&7Server: &f%server%'
+      - '&6&l========================'
+
+  ipunban:
+    message: '&aIP %ip% &7was unbanned by &a%executor%'
+    broadcast_to_everyone: true
+    permission: 'sxbans.admin.punishview.ipunban'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7IP: &f%ip%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Date: &f%date%'
+      - '&6&l========================'
+
+  ipmute:
+    message: '&cIP %ip% &7was muted by &c%executor%'
+    broadcast_to_everyone: false
+    permission: 'sxbans.admin.punishview.ipmute'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7IP: &f%ip%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Date: &f%date%'
+      - '&7Server: &f%server%'
+      - '&6&l========================'
+
+  ipunmute:
+    message: '&aIP %ip% &7was unmuted by &a%executor%'
+    broadcast_to_everyone: true
+    permission: 'sxbans.admin.punishview.ipunmute'
+    hover:
+      - '&6&l=== SXBans Punishment ==='
+      - '&7IP: &f%ip%'
+      - '&7Executor: &f%executor%'
+      - '&7Reason: &f%reason%'
+      - '&7Date: &f%date%'
+      - '&6&l========================'
+
+# -------------------------------------------------------------------
+# PREFIX
+# -------------------------------------------------------------------
+prefix: '&8[&6SXBans&8] &7'
