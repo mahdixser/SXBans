@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="SXBANS.png" alt="SXBans Logo" width="250" height="250">
+<img src="SXBANS 2.png" alt="SXBans Logo" width="250" height="250">
 
 # SXBans
 
