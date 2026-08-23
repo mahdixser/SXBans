@@ -11,7 +11,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-lightgrey.svg)](#license)
 [![Discord](https://img.shields.io/badge/discord-join%20us-5865F2.svg)](https://discord.gg/7xFkMg6apF)
 
-[Features](#features) • [Installation](#installation) • [Commands](#commands) • [Configuration](#configuration) • [Web Panel](#web-panel) • [Wiki](./wiki/Home) • [Discord](https://discord.gg/7xFkMg6apF)
+[Features](#features) • [Installation](#installation) • [Commands](#commands) • [Configuration](#configuration) • [Web Panel](#web-panel) • [Wiki](https://github.com/mahdixser/SXBans/wiki) • [Discord](https://discord.gg/7xFkMg6apF)
 
 </div>
 
