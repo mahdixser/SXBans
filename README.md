@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="SXCMC.png" alt="SXCMC Logo" width="250" height="250">
+
 # SXBans
 
 **A punishment system for Minecraft servers that doesn't make you tab out to a spreadsheet.**
