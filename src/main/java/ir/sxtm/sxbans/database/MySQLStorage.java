@@ -17,7 +17,6 @@ public class MySQLStorage {
         this.dbManager = plugin.getDatabaseManager();
     }
 
-    // Punishment CRUD operations
     public void savePunishment(Punishment punishment) {
         String sql = "INSERT INTO punishments (id, player_uuid, player_name, ip_address, type, reason, " +
                 "duration, start_time, end_time, status, executor_uuid, executor_name, " +
@@ -163,7 +162,6 @@ public class MySQLStorage {
         }
     }
 
-    // History operations
     public void saveHistory(HistoryEntry entry) {
         String sql = "INSERT INTO history (id, player_uuid, player_name, action, details, " +
                 "executor_uuid, executor_name, timestamp, ip_address, server_name, world_name) " +
@@ -228,7 +226,6 @@ public class MySQLStorage {
         return history;
     }
 
-    // IP Data operations
     public void saveIPData(IPData ipData) {
         String sql = "INSERT INTO ip_data (ip_address, country, city, isp, hostname, first_seen, " +
                 "last_seen, total_logins, total_punishments, is_blacklisted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
@@ -294,7 +291,6 @@ public class MySQLStorage {
         return ipDataList;
     }
 
-    // Helper methods
     private void setPunishmentParameters(PreparedStatement stmt, Punishment p) throws SQLException {
         stmt.setString(1, p.getId().toString());
         stmt.setString(2, p.getPlayerUUID().toString());

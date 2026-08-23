@@ -8,10 +8,6 @@ import ir.sxtm.sxbans.models.HistoryEntry;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * API for web panel integration.
- * Provides methods for web panel to interact with the plugin.
- */
 public class WebAPI {
     private final SXBans plugin;
 
@@ -19,40 +15,18 @@ public class WebAPI {
         this.plugin = plugin;
     }
 
-    /**
-     * Check if web server is running.
-     *
-     * @return true if running
-     */
     public boolean isWebServerRunning() {
         return plugin.getWebServer() != null && plugin.getWebServer().isRunning();
     }
 
-    /**
-     * Get web server port.
-     *
-     * @return The port number
-     */
     public int getWebPort() {
         return plugin.getConfigManager().getWebPort();
     }
 
-    /**
-     * Get web server host.
-     *
-     * @return The host address
-     */
     public String getWebHost() {
         return plugin.getConfigManager().getWebHost();
     }
 
-    /**
-     * Authenticate a web user.
-     *
-     * @param username The username
-     * @param password The password
-     * @return The WebUser if authenticated, null otherwise
-     */
     public WebUser authenticateWebUser(String username, String password) {
         if (plugin.getWebUsersManager().authenticate(username, password)) {
             return plugin.getWebUsersManager().getUser(username);
@@ -60,32 +34,14 @@ public class WebAPI {
         return null;
     }
 
-    /**
-     * Create a web session token.
-     *
-     * @param username The username
-     * @return The session token, or null if failed
-     */
     public String createWebSession(String username) {
         return plugin.getWebUsersManager().createSession(username);
     }
 
-    /**
-     * Validate a web session token.
-     *
-     * @param token The session token
-     * @return true if valid
-     */
     public boolean validateWebSession(String token) {
         return plugin.getWebServer().isValidSession(token);
     }
 
-    /**
-     * Get web user by session token.
-     *
-     * @param token The session token
-     * @return The WebUser, or null if invalid
-     */
     public WebUser getWebUserBySession(String token) {
         if (!validateWebSession(token)) return null;
         String username = plugin.getWebServer().getUsernameFromSession(token);
@@ -93,64 +49,26 @@ public class WebAPI {
         return plugin.getWebUsersManager().getUser(username);
     }
 
-    /**
-     * Get all web users.
-     *
-     * @return List of web users
-     */
     public List<WebUser> getAllWebUsers() {
         return plugin.getWebUsersManager().getAllUsers();
     }
 
-    /**
-     * Create a new web user.
-     *
-     * @param username The username
-     * @param password The password
-     * @param level The permission level
-     * @return true if created
-     */
     public boolean createWebUser(String username, String password, int level) {
         return plugin.getWebUsersManager().createUser(username, password, level);
     }
 
-    /**
-     * Delete a web user.
-     *
-     * @param username The username
-     * @return true if deleted
-     */
     public boolean deleteWebUser(String username) {
         return plugin.getWebUsersManager().deleteUser(username);
     }
 
-    /**
-     * Update web user level.
-     *
-     * @param username The username
-     * @param level The new level
-     * @return true if updated
-     */
     public boolean updateWebUserLevel(String username, int level) {
         return plugin.getWebUsersManager().updateUserLevel(username, level);
     }
 
-    /**
-     * Update web user password.
-     *
-     * @param username The username
-     * @param newPassword The new password
-     * @return true if updated
-     */
     public boolean updateWebUserPassword(String username, String newPassword) {
         return plugin.getWebUsersManager().updateUserPassword(username, newPassword);
     }
 
-    /**
-     * Get dashboard statistics.
-     *
-     * @return Map of statistics
-     */
     public java.util.Map<String, Object> getDashboardStats() {
         java.util.Map<String, Object> stats = new java.util.HashMap<>();
 
@@ -193,11 +111,6 @@ public class WebAPI {
         return stats;
     }
 
-    /**
-     * Get punishment statistics by type.
-     *
-     * @return Map of type to count
-     */
     public java.util.Map<String, Long> getPunishmentTypeStats() {
         List<Punishment> allPunishments = plugin.getPunishmentStorage().getAllPunishments();
         return allPunishments.stream()
@@ -207,11 +120,6 @@ public class WebAPI {
                 ));
     }
 
-    /**
-     * Get punishment statistics by day (last 30 days).
-     *
-     * @return Map of day to count
-     */
     public java.util.Map<String, Long> getPunishmentDailyStats() {
         java.util.Map<String, Long> stats = new java.util.LinkedHashMap<>();
         List<Punishment> allPunishments = plugin.getPunishmentStorage().getAllPunishments();
@@ -230,12 +138,6 @@ public class WebAPI {
         return stats;
     }
 
-    /**
-     * Get top punished players.
-     *
-     * @param limit Maximum number of players
-     * @return Map of player name to punishment count
-     */
     public java.util.Map<String, Long> getTopPunishedPlayers(int limit) {
         List<Punishment> allPunishments = plugin.getPunishmentStorage().getAllPunishments();
         return allPunishments.stream()
@@ -254,19 +156,9 @@ public class WebAPI {
                 ));
     }
 
-    /**
-     * Broadcast a message to the web panel.
-     *
-     * @param message The message to broadcast
-     */
     public void broadcastWebMessage(String message) {
     }
 
-    /**
-     * Reload configuration.
-     *
-     * @return true if successful
-     */
     public boolean reloadConfig() {
         try {
             plugin.getConfigManager().reloadConfig();

@@ -12,9 +12,6 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-/**
- * Manager for exporting and importing data.
- */
 public class ExportImportManager {
     private final SXBans plugin;
     private final Gson gson;
@@ -26,50 +23,34 @@ public class ExportImportManager {
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
     }
 
-    /**
-     * Export all data to a file.
-     *
-     * @return The exported file, or null if failed
-     */
     public File exportAllData() {
         return exportAllData(null);
     }
 
-    /**
-     * Export all data to a file with a custom name.
-     *
-     * @param fileName The custom file name
-     * @return The exported file, or null if failed
-     */
     public File exportAllData(String fileName) {
         try {
-            // Create exports directory
+
             File exportDir = new File(plugin.getDataFolder(), "exports");
             if (!exportDir.exists()) {
                 exportDir.mkdirs();
             }
 
-            // Generate file name
             if (fileName == null) {
                 fileName = "sxbans_export_" + dateFormat.format(new Date()) + ".json";
             }
             File exportFile = new File(exportDir, fileName);
 
-            // Collect all data
             Map<String, Object> exportData = new LinkedHashMap<>();
             exportData.put("exportDate", System.currentTimeMillis());
             exportData.put("pluginVersion", plugin.getDescription().getVersion());
             exportData.put("serverName", plugin.getServer().getName());
 
-            // Punishments
             List<Punishment> punishments = plugin.getPunishmentStorage().getAllPunishments();
             exportData.put("punishments", punishments);
             exportData.put("totalPunishments", punishments.size());
 
-            // Settings
             exportData.put("settings", plugin.getConfigManager().getConfig().getValues(true));
 
-            // Write to file
             try (Writer writer = new FileWriter(exportFile, StandardCharsets.UTF_8)) {
                 gson.toJson(exportData, writer);
             }
@@ -84,11 +65,6 @@ public class ExportImportManager {
         }
     }
 
-    /**
-     * Export data as a ZIP archive.
-     *
-     * @return The exported ZIP file, or null if failed
-     */
     public File exportAsZip() {
         try {
             File exportDir = new File(plugin.getDataFolder(), "exports");
@@ -102,20 +78,17 @@ public class ExportImportManager {
             try (FileOutputStream fos = new FileOutputStream(zipFile);
                  ZipOutputStream zos = new ZipOutputStream(fos)) {
 
-                // Export JSON data
                 File jsonFile = exportAllData("temp_export.json");
                 if (jsonFile != null) {
                     addToZip(zos, jsonFile, "data.json");
                     jsonFile.delete();
                 }
 
-                // Add config files
                 addToZip(zos, new File(plugin.getDataFolder(), "config.yml"), "config.yml");
                 addToZip(zos, new File(plugin.getDataFolder(), "messages.yml"), "messages.yml");
                 addToZip(zos, new File(plugin.getDataFolder(), "webadminusers.json"), "webadminusers.json");
                 addToZip(zos, new File(plugin.getDataFolder(), "templates.yml"), "templates.yml");
 
-                // Add log file if exists
                 File logFile = new File(plugin.getDataFolder(), "logs" + File.separator + "sxbans.log");
                 if (logFile.exists()) {
                     addToZip(zos, logFile, "logs/sxbans.log");
@@ -132,9 +105,6 @@ public class ExportImportManager {
         }
     }
 
-    /**
-     * Add a file to a ZIP archive.
-     */
     private void addToZip(ZipOutputStream zos, File file, String entryName) throws IOException {
         if (!file.exists()) return;
 
@@ -152,12 +122,6 @@ public class ExportImportManager {
         zos.closeEntry();
     }
 
-    /**
-     * Import data from a file.
-     *
-     * @param file The file to import
-     * @return true if successful
-     */
     public boolean importData(File file) {
         if (!file.exists()) {
             plugin.getSXBansLogger().severe("Import file not found: " + file.getAbsolutePath());
@@ -165,7 +129,7 @@ public class ExportImportManager {
         }
 
         try {
-            // Read file
+
             String content;
             try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
                 StringBuilder sb = new StringBuilder();
@@ -176,10 +140,8 @@ public class ExportImportManager {
                 content = sb.toString();
             }
 
-            // Parse JSON
             Map<String, Object> importData = gson.fromJson(content, Map.class);
 
-            // Import punishments
             Object punishmentsObj = importData.get("punishments");
             if (punishmentsObj instanceof List) {
                 List<?> punishmentList = (List<?>) punishmentsObj;
@@ -187,11 +149,11 @@ public class ExportImportManager {
                     String json = gson.toJson(obj);
                     Punishment punishment = gson.fromJson(json, Punishment.class);
                     if (punishment != null) {
-                        // Check if punishment already exists - استفاده از getPunishment به جای isPresent
+
                         Punishment existing = plugin.getPunishmentStorage().getPunishment(punishment.getId());
                         if (existing == null) {
                             plugin.getPunishmentStorage().savePunishment(punishment);
-                            // استفاده از متد عمومی addPunishmentToCache
+
                             plugin.getPunishmentManager().addPunishmentToCache(punishment);
                         }
                     }
@@ -209,12 +171,6 @@ public class ExportImportManager {
         }
     }
 
-    /**
-     * Import data from a ZIP archive.
-     *
-     * @param zipFile The ZIP file to import
-     * @return true if successful
-     */
     public boolean importFromZip(File zipFile) {
         if (!zipFile.exists()) {
             plugin.getSXBansLogger().severe("ZIP file not found: " + zipFile.getAbsolutePath());
@@ -222,8 +178,7 @@ public class ExportImportManager {
         }
 
         try {
-            // Extract and import
-            // This would require unzipping and importing each file
+
             plugin.getSXBansLogger().info("ZIP import not fully implemented yet");
             return false;
 
@@ -234,11 +189,6 @@ public class ExportImportManager {
         }
     }
 
-    /**
-     * Get a list of export files.
-     *
-     * @return List of export files
-     */
     public List<File> getExportFiles() {
         File exportDir = new File(plugin.getDataFolder(), "exports");
         List<File> files = new ArrayList<>();
@@ -254,12 +204,6 @@ public class ExportImportManager {
         return files;
     }
 
-    /**
-     * Delete an export file.
-     *
-     * @param file The file to delete
-     * @return true if deleted
-     */
     public boolean deleteExportFile(File file) {
         if (file.exists()) {
             return file.delete();

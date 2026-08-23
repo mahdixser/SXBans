@@ -28,11 +28,9 @@ public class AuthService {
             return new WebResponse(false, "Invalid credentials");
         }
 
-        // Update last login
         user.setLastLogin(System.currentTimeMillis());
         plugin.getWebUsersManager().saveUsers();
 
-        // Create session
         String token = plugin.getWebUsersManager().createSession(username);
         if (token == null) {
             return new WebResponse(false, "Failed to create session");

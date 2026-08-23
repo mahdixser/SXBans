@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* ===== PLAYER CARD STYLES ===== */
+
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Inter', -apple-system, sans-serif;
@@ -127,7 +127,6 @@
             border:1px solid rgba(255,255,255,0.05);
         }
         .card-section h4 { font-size:14px; font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
-        .card-section h5 { font-size:13px; margin-bottom:4px; }
 
         .ip-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:13px; }
         .ip-info-grid span { color:#8899aa; }
@@ -242,10 +241,10 @@
 <body>
 <div id="playerCardContainer" class="player-card-container">
     <div class="glass-card" id="playerCard3D">
-        <!-- Header -->
+
         <div class="card-header-3d">
             <div class="card-avatar-container">
-                <img src="https://crafatar.com/avatars/{{playerUuid}}?size=128" alt="{{playerName}}" class="card-avatar-3d" id="playerAvatar">
+                <img src="https://minotar.net/avatar/{{playerUuid}}/128" alt="{{playerName}}" class="card-avatar-3d" id="playerAvatar">
                 <div class="card-status-badge" id="playerStatusBadge">
                     <i class="fas fa-circle"></i>
                     <span id="playerStatusText">Offline</span>
@@ -261,7 +260,6 @@
             </button>
         </div>
 
-        <!-- Stats -->
         <div class="card-stats-grid">
             <div class="card-stat-item"><span class="stat-label">Total</span><span class="stat-value" id="totalPunishments">0</span></div>
             <div class="card-stat-item"><span class="stat-label">Active</span><span class="stat-value" id="activePunishments">0</span></div>
@@ -269,7 +267,6 @@
             <div class="card-stat-item"><span class="stat-label">Last Activity</span><span class="stat-value" id="lastActivity">-</span></div>
         </div>
 
-        <!-- IP -->
         <div class="card-section">
             <h4><i class="fas fa-globe"></i> IP Information</h4>
             <div class="ip-info-grid">
@@ -281,13 +278,11 @@
             </div>
         </div>
 
-        <!-- Alt Accounts -->
         <div class="card-section">
             <h4><i class="fas fa-users"></i> Alt Accounts</h4>
             <div id="altAccounts"><span class="text-muted">No alt accounts</span></div>
         </div>
 
-        <!-- Active Punishments -->
         <div class="card-section">
             <div class="section-header-actions">
                 <h4><i class="fas fa-gavel"></i> Active Punishments</h4>
@@ -299,7 +294,6 @@
             <div style="margin-top:8px;" id="activeKicksList"><span class="text-muted">No kick records</span></div>
         </div>
 
-        <!-- History -->
         <div class="card-section">
             <h4><i class="fas fa-clock-rotate-left"></i> History</h4>
             <div id="historyList"><span class="text-muted">Loading...</span></div>
@@ -316,50 +310,89 @@
     const urlParams = new URLSearchParams(window.location.search);
     const playerUuid = urlParams.get('uuid');
     const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username') || 'admin';
+
     if (!token) window.location.href = '/login';
 
-    // 3D Tilt Effect
     const card = document.getElementById('playerCard3D');
     const avatar = document.getElementById('playerAvatar');
 
-    card.addEventListener('mousemove', function(e) {
-        const rect = this.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const cx = rect.width/2, cy = rect.height/2;
-        const rx = (y - cy) / cy * -12;
-        const ry = (x - cx) / cx * 12;
-        this.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-        avatar.style.transform = `translate(${(x-cx)/cx*15}px, ${(y-cy)/cy*15}px) scale(1.05)`;
-    });
-    card.addEventListener('mouseleave', function() {
-        this.style.transform = 'perspective(800px) rotateX(0) rotateY(0)';
-        avatar.style.transform = 'translate(0,0) scale(1)';
-    });
+    if (card && avatar) {
+        card.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const cx = rect.width/2, cy = rect.height/2;
+            const rx = (y - cy) / cy * -12;
+            const ry = (x - cx) / cx * 12;
+            this.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+            avatar.style.transform = `translate(${(x-cx)/cx*15}px, ${(y-cy)/cy*15}px) scale(1.05)`;
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'perspective(800px) rotateX(0) rotateY(0)';
+            avatar.style.transform = 'translate(0,0) scale(1)';
+        });
+    }
 
     async function loadPlayerData() {
+        if (!playerUuid) {
+            document.getElementById('playerNameDisplay').textContent = 'No Player Selected';
+            document.getElementById('playerUuidDisplay').textContent = 'Missing UUID parameter';
+            return;
+        }
+
         try {
-            const response = await fetch(`/api/players/${encodeURIComponent(playerUuid)}`, {
+
+            let response = await fetch(`/api/players/${encodeURIComponent(playerUuid)}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const data = await response.json();
-            if (data.success) renderPlayerCard(data);
-            else document.getElementById('playerNameDisplay').textContent = 'Player Not Found';
+            let data = await response.json();
+
+            if (!data.success) {
+
+                const playerName = playerUuid;
+                response = await fetch(`/api/players/${encodeURIComponent(playerName)}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                data = await response.json();
+            }
+
+            if (data && data.success) {
+                renderPlayerCard(data);
+            } else {
+                document.getElementById('playerNameDisplay').textContent = 'Player Not Found';
+                document.getElementById('playerUuidDisplay').textContent = 'The player does not exist';
+                document.getElementById('historyList').innerHTML = '<span class="text-muted">No data available</span>';
+            }
         } catch (error) {
             console.error('Error loading player:', error);
             document.getElementById('playerNameDisplay').textContent = 'Error Loading Data';
+            document.getElementById('playerUuidDisplay').textContent = error.message;
+            document.getElementById('historyList').innerHTML = '<span class="text-muted" style="color:#e74c3c;">Error loading data</span>';
         }
+    }
+
+    function safeGet(obj, key, defaultValue) {
+        if (!obj) return defaultValue;
+        const val = obj[key];
+        return (val !== undefined && val !== null) ? val : defaultValue;
     }
 
     function renderPunishmentRow(p) {
         const isKick = p.type === 'KICK' || p.type === 'IP_KICK';
+        const type = safeGet(p, 'type', 'UNKNOWN');
+        const reason = safeGet(p, 'reason', 'No reason');
+        const executorName = safeGet(p, 'executorName', 'Unknown');
+        const timeRemaining = safeGet(p, 'timeRemaining', 'Permanent');
+        const id = safeGet(p, 'id', '');
+
         return `
             <div class="punishment-item">
-                <span class="punishment-type type-${p.type}">${p.type}</span>
-                <span style="flex:1;font-size:13px;">${p.reason || 'No reason'}</span>
-                <span style="color:#8899aa;font-size:11px;">${p.executorName || 'Unknown'}</span>
-                <span style="color:#8899aa;font-size:11px;">${p.timeRemaining || 'Permanent'}</span>
-                ${!isKick ? `<button class="action-btn" onclick="removePunishment('${p.id}')" title="Remove"><i class="fas fa-trash"></i></button>` : ''}
+                <span class="punishment-type type-${type}">${type}</span>
+                <span style="flex:1;font-size:13px;">${reason}</span>
+                <span style="color:#8899aa;font-size:11px;">${executorName}</span>
+                <span style="color:#8899aa;font-size:11px;">${timeRemaining}</span>
+                ${!isKick && id ? `<button class="action-btn" onclick="removePunishment('${id}')" title="Remove"><i class="fas fa-trash"></i></button>` : ''}
             </div>
         `;
     }
@@ -368,48 +401,49 @@
         const p = data;
         const punishments = p.punishments || [];
 
-        document.getElementById('playerNameDisplay').textContent = p.name;
-        document.getElementById('playerUuidDisplay').textContent = p.uuid;
-        document.getElementById('totalPunishments').textContent = p.totalPunishments || 0;
-        document.getElementById('activePunishments').textContent = p.activePunishmentsCount || 0;
-        document.getElementById('warningCount').textContent = `${p.warnings||0}/${p.maxWarnings||5}`;
+        document.getElementById('playerNameDisplay').textContent = safeGet(p, 'name', 'Unknown');
+        document.getElementById('playerUuidDisplay').textContent = safeGet(p, 'uuid', 'N/A');
+        document.getElementById('totalPunishments').textContent = safeGet(p, 'totalPunishments', 0);
+        document.getElementById('activePunishments').textContent = safeGet(p, 'activePunishmentsCount', 0);
+        document.getElementById('warningCount').textContent = `${safeGet(p, 'warnings', 0)}/${safeGet(p, 'maxWarnings', 5)}`;
         document.getElementById('lastActivity').textContent = p.lastPlayed ? new Date(p.lastPlayed).toLocaleDateString() : '-';
         document.getElementById('loadTime').textContent = `Loaded: ${new Date().toLocaleTimeString()}`;
 
-        // Status
         const badge = document.getElementById('playerStatusBadge');
         const text = document.getElementById('playerStatusText');
-        if (p.isOnline) { badge.className = 'card-status-badge online'; text.textContent = 'Online'; }
-        else if (p.isBanned) { badge.className = 'card-status-badge banned'; text.textContent = 'Banned'; }
-        else if (p.isMuted) { badge.className = 'card-status-badge muted'; text.textContent = 'Muted'; }
+        const isOnline = safeGet(p, 'isOnline', false);
+        const isBanned = safeGet(p, 'isBanned', false);
+        const isMuted = safeGet(p, 'isMuted', false);
+
+        if (isOnline) { badge.className = 'card-status-badge online'; text.textContent = 'Online'; }
+        else if (isBanned) { badge.className = 'card-status-badge banned'; text.textContent = 'Banned'; }
+        else if (isMuted) { badge.className = 'card-status-badge muted'; text.textContent = 'Muted'; }
         else { badge.className = 'card-status-badge offline'; text.textContent = 'Offline'; }
 
-        // Badges
         let badges = '';
-        if (p.isBanned) badges += '<span class="badge badge-danger">Banned</span>';
-        if (p.isMuted) badges += '<span class="badge badge-warning">Muted</span>';
-        if (p.isOnline) badges += '<span class="badge badge-success">Online</span>';
-        if (p.warnings >= p.maxWarnings) badges += '<span class="badge badge-danger">Max Warnings</span>';
+        if (isBanned) badges += '<span class="badge badge-danger">Banned</span>';
+        if (isMuted) badges += '<span class="badge badge-warning">Muted</span>';
+        if (isOnline) badges += '<span class="badge badge-success">Online</span>';
+        if ((p.warnings || 0) >= (p.maxWarnings || 5)) badges += '<span class="badge badge-danger">Max Warnings</span>';
         document.getElementById('playerBadges').innerHTML = badges || '<span class="badge badge-secondary">Clean</span>';
 
-        // IP
-        if (p.ip) {
-            document.getElementById('playerIp').textContent = p.ip;
-            document.getElementById('playerCountry').textContent = p.ipCountry || '-';
-            document.getElementById('playerCity').textContent = p.ipCity || '-';
-            document.getElementById('playerIsp').textContent = p.ipIsp || '-';
-            document.getElementById('playerIpCount').textContent = p.ipPlayerCount || 0;
+        const ip = safeGet(p, 'ip', null);
+        if (ip) {
+            document.getElementById('playerIp').textContent = ip;
+            document.getElementById('playerCountry').textContent = safeGet(p, 'ipCountry', '-');
+            document.getElementById('playerCity').textContent = safeGet(p, 'ipCity', '-');
+            document.getElementById('playerIsp').textContent = safeGet(p, 'ipIsp', '-');
+            document.getElementById('playerIpCount').textContent = safeGet(p, 'ipPlayerCount', 0);
         }
 
-        // Alt Accounts
         const altContainer = document.getElementById('altAccounts');
-        if (p.altAccounts && p.altAccounts.length > 0) {
-            altContainer.innerHTML = p.altAccounts.map(name => `<span class="alt-tag">${name}</span>`).join('');
+        const alts = safeGet(p, 'altAccounts', []);
+        if (alts && alts.length > 0) {
+            altContainer.innerHTML = alts.map(name => `<span class="alt-tag">${name}</span>`).join('');
         } else {
             altContainer.innerHTML = '<span class="text-muted">No alt accounts detected</span>';
         }
 
-        // Active Punishments
         const bans = punishments.filter(x => x.type === 'BAN' || x.type === 'TEMP_BAN');
         const mutes = punishments.filter(x => x.type === 'MUTE' || x.type === 'TEMP_MUTE');
         const warns = punishments.filter(x => x.type === 'WARN');
@@ -420,17 +454,25 @@
         document.getElementById('activeWarnsList').innerHTML = warns.length > 0 ? warns.map(renderPunishmentRow).join('') : '<span class="text-muted">No active warnings</span>';
         document.getElementById('activeKicksList').innerHTML = kicks.length > 0 ? kicks.map(renderPunishmentRow).join('') : '<span class="text-muted">No kick records</span>';
 
-        // History
         const historyList = document.getElementById('historyList');
         if (punishments.length > 0) {
-            historyList.innerHTML = punishments.slice(0,15).map(pun => `
-                <div class="history-item">
-                    <span class="history-type type-${pun.type}">${pun.type}</span>
-                    <span class="history-reason">${pun.reason || 'No reason'}</span>
-                    <span class="history-meta">${pun.executorName || 'Unknown'} • ${pun.createdAt ? new Date(pun.createdAt).toLocaleDateString() : '-'}</span>
-                    <span class="history-status status-${pun.status}">${pun.status}</span>
-                </div>
-            `).join('');
+            historyList.innerHTML = punishments.slice(0,15).map(pun => {
+                const type = safeGet(pun, 'type', 'UNKNOWN');
+                const reason = safeGet(pun, 'reason', 'No reason');
+                const executorName = safeGet(pun, 'executorName', 'Unknown');
+                const createdAt = safeGet(pun, 'createdAt', null);
+                const status = safeGet(pun, 'status', 'ACTIVE');
+                const dateStr = createdAt ? new Date(createdAt).toLocaleDateString() : '-';
+
+                return `
+                    <div class="history-item">
+                        <span class="history-type type-${type}">${type}</span>
+                        <span class="history-reason">${reason}</span>
+                        <span class="history-meta">${executorName} • ${dateStr}</span>
+                        <span class="history-status status-${status}">${status}</span>
+                    </div>
+                `;
+            }).join('');
         } else {
             historyList.innerHTML = '<span class="text-muted">No punishment history</span>';
         }
@@ -445,16 +487,27 @@
                 body: JSON.stringify({ id })
             });
             const data = await response.json();
-            if (data.success) { loadPlayerData(); alert('Removed!'); }
-            else alert('Error: ' + data.message);
-        } catch (error) { alert('Connection error'); }
+            if (data && data.success) {
+                loadPlayerData();
+                alert('Punishment removed successfully!');
+            } else {
+                alert('Error: ' + (data ? data.message : 'Unknown error'));
+            }
+        } catch (error) {
+            alert('Connection error: ' + error.message);
+        }
     }
 
     function showAddPunishment() { window.location.href = '/players'; }
     function closeCard() { window.location.href = '/players'; }
 
     document.addEventListener('DOMContentLoaded', function() {
-        if (!playerUuid) { document.getElementById('playerNameDisplay').textContent = 'No Player Selected'; return; }
+        if (!playerUuid) {
+            document.getElementById('playerNameDisplay').textContent = 'No Player Selected';
+            document.getElementById('playerUuidDisplay').textContent = 'Missing player UUID';
+            document.getElementById('historyList').innerHTML = '<span class="text-muted">No player specified</span>';
+            return;
+        }
         loadPlayerData();
     });
 </script>

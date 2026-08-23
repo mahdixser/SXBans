@@ -34,20 +34,17 @@ public class UnmuteCommand extends BaseCommand {
             return true;
         }
 
-        // Check if player is muted
         if (!plugin.getPunishmentManager().isPlayerMuted(targetUUID)) {
             sendMessage(sender, "error.not-muted", Map.of("player", playerName));
             return true;
         }
 
-        // Get active mute
         Punishment mute = plugin.getPunishmentManager().getActiveMute(targetUUID);
         if (mute == null) {
             sendMessage(sender, "error.not-muted", Map.of("player", playerName));
             return true;
         }
 
-        // Remove mute
         UUID removerUUID = sender instanceof Player ? ((Player) sender).getUniqueId() :
                 UUID.fromString("00000000-0000-0000-0000-000000000000");
         String removerName = sender.getName();
@@ -63,10 +60,6 @@ public class UnmuteCommand extends BaseCommand {
         if (success) {
             sendMessage(sender, "success.unmute", Map.of("player", playerName));
 
-            // Broadcast
-            String broadcast = plugin.getMessagesManager().getColoredMessage("broadcast.unmute",
-                    Map.of("player", playerName, "executor", removerName));
-            Bukkit.broadcastMessage(broadcast);
         }
 
         return true;
@@ -80,9 +73,9 @@ public class UnmuteCommand extends BaseCommand {
     @Override
     protected List<String> tabComplete(CommandSender sender, String[] args) {
         if (args.length == 1) {
-            // Get all muted players
+
             List<String> mutedPlayers = new ArrayList<>();
-            // This would need to get from storage
+
             return mutedPlayers;
         }
         return Collections.emptyList();

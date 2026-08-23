@@ -52,7 +52,6 @@ public class WebPunishment {
         this.isExpired = punishment.isExpired();
     }
 
-    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getPlayerName() { return playerName; }

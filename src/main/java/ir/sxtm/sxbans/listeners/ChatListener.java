@@ -22,9 +22,23 @@ public class ChatListener implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
+
+        if (player.getAddress() == null || player.getAddress().getAddress() == null) {
+            return;
+        }
         String ip = player.getAddress().getAddress().getHostAddress();
 
-        // Check for active mutes
+        if (plugin.getPunishmentManager().isIpMuted(ip)) {
+            String message = plugin.getMessagesManager().getIpMuteMessage(null);
+            if (message == null || message.isEmpty()) {
+                message = "&cYour IP address has been muted!";
+            }
+            player.sendMessage(plugin.getMessagesManager().colorize(message));
+            event.setCancelled(true);
+            plugin.getSXBansLogger().info("Blocked chat from muted IP: " + ip + " (" + player.getName() + ")");
+            return;
+        }
+
         if (plugin.getPunishmentManager().isPlayerMuted(uuid)) {
             Punishment mute = plugin.getPunishmentManager().getActiveMute(uuid);
             if (mute != null) {
@@ -34,35 +48,24 @@ public class ChatListener implements Listener {
             }
         }
 
-        // Check for IP mutes
-        if (plugin.getPunishmentManager().isIpMuted(ip)) {
-            player.sendMessage(plugin.getMessagesManager().getColoredMessage("punishment.ipmute.message",
-                    Map.of("reason", "Your IP address has been muted")));
-            event.setCancelled(true);
-            return;
-        }
-
-        // Check for muted by name (wildcard)
         if (plugin.getConfigManager().getBoolean("mute.wildcard-enabled", false)) {
             String mutedName = plugin.getConfigManager().getString("mute.wildcard-name");
             if (mutedName != null && player.getName().toLowerCase().contains(mutedName.toLowerCase())) {
-                player.sendMessage(plugin.getMessagesManager().getColoredMessage("punishment.mute.wildcard"));
+                player.sendMessage(plugin.getMessagesManager().getMuteWildcardMessage());
                 event.setCancelled(true);
                 return;
             }
         }
 
-        // Check for muted words
         if (plugin.getConfigManager().getBoolean("mute.filter-enabled", true)) {
             String message = event.getMessage();
             String[] mutedWords = plugin.getConfigManager().getString("mute.filter-words", "").split(",");
             for (String word : mutedWords) {
+                if (word.trim().isEmpty()) continue;
                 if (message.toLowerCase().contains(word.toLowerCase().trim())) {
                     event.setCancelled(true);
-                    player.sendMessage(plugin.getMessagesManager().getColoredMessage("punishment.mute.filter"));
-
-                    // Log the mute
-                    plugin.getLogger().info("Player " + player.getName() + " was muted for using filtered word");
+                    player.sendMessage(plugin.getMessagesManager().getMuteFilterMessage());
+                    plugin.getSXBansLogger().info("Player " + player.getName() + " was blocked for using filtered word: " + word);
                     return;
                 }
             }

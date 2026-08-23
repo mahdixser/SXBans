@@ -24,23 +24,19 @@ public class AltAccountDetector {
     public Set<UUID> detectAlts(Player player) {
         UUID uuid = player.getUniqueId();
 
-        // Check cache
         if (altCache.containsKey(uuid)) {
             long last = lastDetection.getOrDefault(uuid, 0L);
-            if (System.currentTimeMillis() - last < 60000) { // 1 minute cache
+            if (System.currentTimeMillis() - last < 60000) {
                 return altCache.get(uuid);
             }
         }
 
-        // Detect alts - findAltAccounts returns List<UUID>, convert to Set
         List<UUID> altList = ipTracker.findAltAccounts(uuid);
         Set<UUID> alts = new HashSet<>(altList);
 
-        // Cache results
         altCache.put(uuid, alts);
         lastDetection.put(uuid, System.currentTimeMillis());
 
-        // Log detection
         if (!alts.isEmpty()) {
             plugin.getSXBansLogger().info("Detected " + alts.size() + " alt accounts for " + player.getName());
         }
@@ -66,7 +62,6 @@ public class AltAccountDetector {
             toProcess.remove(current);
             processed.add(current);
 
-            // findAltAccounts returns List<UUID>, convert to Set
             List<UUID> altList = ipTracker.findAltAccounts(current);
             Set<UUID> alts = new HashSet<>(altList);
             network.put(current, alts);
@@ -84,7 +79,6 @@ public class AltAccountDetector {
     public boolean shouldFlagAltAccount(Player player) {
         Set<UUID> alts = detectAlts(player);
 
-        // Check if any alt has active punishments
         for (UUID altUUID : alts) {
             if (plugin.getPunishmentManager().isPlayerBanned(altUUID)) {
                 return true;

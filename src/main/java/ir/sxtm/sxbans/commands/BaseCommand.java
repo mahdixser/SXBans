@@ -35,7 +35,14 @@ public abstract class BaseCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        return execute(sender, args);
+        try {
+            return execute(sender, args);
+        } catch (Exception e) {
+            sendRawMessage(sender, "&cAn error occurred while executing this command. Check console for details.");
+            plugin.getSXBansLogger().severe("Error executing command '" + label + "': " + e.getMessage());
+            e.printStackTrace();
+            return true;
+        }
     }
 
     protected abstract boolean hasPermission(CommandSender sender);

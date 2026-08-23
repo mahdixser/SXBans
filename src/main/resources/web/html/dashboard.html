@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* ===== RESET & BASE ===== */
+
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Inter', -apple-system, sans-serif;
@@ -18,12 +18,10 @@
             overflow-x: hidden;
         }
 
-        /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar { width:6px; height:6px; }
         ::-webkit-scrollbar-track { background:#1a1a2e; }
         ::-webkit-scrollbar-thumb { background:#6c5ce7; border-radius:4px; }
 
-        /* ===== GLASS ===== */
         .glass-card {
             background:rgba(255,255,255,0.05);
             backdrop-filter:blur(20px);
@@ -40,10 +38,8 @@
             transform:translateY(-2px);
         }
 
-        /* ===== APP LAYOUT ===== */
         .app-container { display:flex; min-height:100vh; }
 
-        /* ===== SIDEBAR ===== */
         .sidebar {
             width:220px;
             background:rgba(10,10,26,0.9);
@@ -101,10 +97,8 @@
         }
         .logout-btn:hover { color:#e74c3c; background:rgba(231,76,60,0.1); }
 
-        /* ===== MAIN CONTENT ===== */
         .main-content { margin-left:220px; flex:1; padding:20px; min-height:100vh; }
 
-        /* ===== TOP BAR ===== */
         .top-bar {
             padding:14px 20px;
             border-radius:16px;
@@ -144,7 +138,6 @@
         }
         .refresh-btn:hover { color:#fff; background:rgba(255,255,255,0.05); }
 
-        /* ===== BUTTONS ===== */
         .btn-primary {
             background:linear-gradient(135deg,#6c5ce7,#5a4bd1);
             color:#fff;
@@ -161,7 +154,6 @@
         }
         .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(108,92,231,0.3); }
 
-        /* ===== STATS ===== */
         .stats-grid {
             display:grid;
             grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -192,7 +184,6 @@
         .stat-content h3 { font-size:24px; font-weight:700; }
         .stat-content p { font-size:12px; color:#8899aa; }
 
-        /* ===== CHARTS ===== */
         .charts-grid {
             display:grid;
             grid-template-columns:2fr 1fr;
@@ -205,7 +196,6 @@
         .chart-subtitle { font-size:12px; color:#8899aa; }
         .chart-card canvas { max-height:220px; width:100% !important; }
 
-        /* ===== TABLE ===== */
         .table-container { overflow-x:auto; }
         .punishments-table {
             width:100%;
@@ -260,7 +250,6 @@
 
         .text-center { text-align:center; }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width:1024px) {
             .charts-grid { grid-template-columns:1fr; }
         }
@@ -285,7 +274,7 @@
 </head>
 <body>
 <div class="app-container">
-    <!-- Sidebar -->
+
     <nav class="sidebar">
         <div class="sidebar-header">
             <div class="logo-small">
@@ -301,9 +290,9 @@
         </ul>
         <div class="sidebar-footer">
             <div class="user-info">
-                <img src="https://crafatar.com/avatars/{{uuid}}?size=32" alt="User" class="user-avatar">
+                <img src="https://minotar.net/avatar/00000000-0000-0000-0000-000000000000/32" alt="User" class="user-avatar" id="sidebarAvatar">
                 <div>
-                    <span class="user-name">{{username}}</span>
+                    <span class="user-name" id="sidebarUsername">{{username}}</span>
                     <span class="user-level">Level {{user_level}}</span>
                 </div>
             </div>
@@ -313,7 +302,6 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="main-content">
         <header class="top-bar">
             <div class="page-title">
@@ -332,7 +320,6 @@
             </div>
         </header>
 
-        <!-- Stats -->
         <section class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon" style="background:rgba(52,152,219,0.2);">
@@ -372,7 +359,6 @@
             </div>
         </section>
 
-        <!-- Charts -->
         <section class="charts-grid">
             <div class="chart-card">
                 <div class="chart-header">
@@ -390,7 +376,6 @@
             </div>
         </section>
 
-        <!-- Recent -->
         <section class="recent-section glass-card">
             <div class="section-header">
                 <h3>Recent Punishments</h3>
@@ -422,6 +407,20 @@
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login';
 
+    function updateSidebarAvatar() {
+        const avatar = document.getElementById('sidebarAvatar');
+        const nameEl = document.getElementById('sidebarUsername');
+        const username = localStorage.getItem('username') || 'Admin';
+
+        if (avatar) {
+
+            avatar.src = 'https://minotar.net/avatar/00000000-0000-0000-0000-000000000000/32';
+        }
+        if (nameEl) {
+            nameEl.textContent = username;
+        }
+    }
+
     function logout() {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
@@ -452,7 +451,6 @@
         document.getElementById('datetime').textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
     }
 
-    // Charts
     let dailyChart, pieChart;
 
     async function loadCharts() {
@@ -509,6 +507,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        updateSidebarAvatar();
         refreshData();
         loadCharts();
         updateDateTime();

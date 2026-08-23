@@ -21,7 +21,6 @@ public class PlayerService {
     public WebResponse getPlayers(int page, int limit, String search, String sort, String order) {
         List<Punishment> allPunishments = plugin.getPunishmentStorage().getAllPunishments();
 
-        // Group by player
         Map<String, List<Punishment>> playerMap = allPunishments.stream()
                 .collect(Collectors.groupingBy(Punishment::getPlayerName));
 
@@ -59,7 +58,6 @@ public class PlayerService {
                     .count();
             player.put("warnings", warnings);
 
-            // Get first and last punishment
             punishments.stream()
                     .min(Comparator.comparing(Punishment::getCreatedAt))
                     .ifPresent(p -> player.put("firstPunishment", p.getCreatedAt()));
@@ -68,7 +66,6 @@ public class PlayerService {
                     .max(Comparator.comparing(Punishment::getCreatedAt))
                     .ifPresent(p -> player.put("lastPunishment", p.getCreatedAt()));
 
-            // Get IP
             String ip = punishments.stream()
                     .filter(p -> p.getIpAddress() != null)
                     .findFirst()
@@ -76,20 +73,17 @@ public class PlayerService {
                     .orElse("Unknown");
             player.put("ip", ip);
 
-            // Head URL
             player.put("headUrl", "https://crafatar.com/avatars/" + uuid.toString() + "?size=64");
 
             players.add(player);
         }
 
-        // Filter by search
         if (search != null && !search.isEmpty()) {
             players = players.stream()
                     .filter(p -> ((String) p.get("name")).toLowerCase().contains(search.toLowerCase()))
                     .collect(Collectors.toList());
         }
 
-        // Sort
         if (sort != null) {
             boolean ascending = "asc".equalsIgnoreCase(order);
             players.sort((a, b) -> {
@@ -123,7 +117,6 @@ public class PlayerService {
             });
         }
 
-        // Paginate
         int total = players.size();
         int start = (page - 1) * limit;
         int end = Math.min(start + limit, total);
@@ -154,14 +147,12 @@ public class PlayerService {
         response.put("firstPlayed", player.getFirstPlayed());
         response.put("lastPlayed", player.getLastPlayed());
 
-        // Punishments
         List<WebPunishment> webPunishments = punishments.stream()
                 .map(WebPunishment::new)
                 .collect(Collectors.toList());
         response.put("punishments", webPunishments);
         response.put("totalPunishments", punishments.size());
 
-        // Active punishments
         List<WebPunishment> activePunishments = punishments.stream()
                 .filter(Punishment::isActive)
                 .map(WebPunishment::new)
@@ -169,12 +160,10 @@ public class PlayerService {
         response.put("activePunishments", activePunishments);
         response.put("activePunishmentsCount", activePunishments.size());
 
-        // Warnings
         int warnings = plugin.getPunishmentManager().getWarningCount(uuid);
         response.put("warnings", warnings);
         response.put("maxWarnings", plugin.getConfigManager().getMaxWarnings());
 
-        // IP info
         String ip = punishments.stream()
                 .filter(p -> p.getIpAddress() != null)
                 .findFirst()
@@ -191,7 +180,6 @@ public class PlayerService {
             }
         }
 
-        // Alt accounts
         Set<UUID> alts = plugin.getAltAccountDetector().detectAlts(player.getPlayer());
         response.put("altAccounts", alts.stream()
                 .map(Bukkit::getOfflinePlayer)
@@ -199,7 +187,6 @@ public class PlayerService {
                 .map(OfflinePlayer::getName)
                 .collect(Collectors.toList()));
 
-        // Head URL
         response.put("headUrl", "https://crafatar.com/avatars/" + uuid.toString() + "?size=128");
 
         return new WebResponse(true, "Success", response);

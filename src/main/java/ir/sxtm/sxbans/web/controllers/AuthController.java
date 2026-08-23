@@ -41,12 +41,11 @@ public class AuthController extends HttpServlet {
     }
 
     private void handleLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        // Parse request body
+
         JsonObject body = parseBody(req);
         String username = body.get("username").getAsString();
         String password = body.get("password").getAsString();
 
-        // Authenticate
         if (plugin.getWebUsersManager().authenticate(username, password)) {
             String token = plugin.getWebUsersManager().createSession(username);
             if (token != null) {
@@ -111,7 +110,6 @@ public class AuthController extends HttpServlet {
             return auth.substring(7);
         }
 
-        // Check cookie
         String cookieHeader = req.getHeader("Cookie");
         if (cookieHeader != null) {
             for (String cookie : cookieHeader.split(";")) {

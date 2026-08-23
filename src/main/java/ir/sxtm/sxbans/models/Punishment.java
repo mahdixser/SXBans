@@ -10,9 +10,9 @@ public class Punishment {
     private String ipAddress;
     private final PunishmentType type;
     private final String reason;
-    private final long duration; // -1 for permanent
+    private final long duration;
     private final long startTime;
-    private long endTime; // -1 for permanent
+    private long endTime;
     private PunishmentStatus status;
     private final UUID executorUUID;
     private final String executorName;
@@ -28,6 +28,19 @@ public class Punishment {
     private String ipCity;
     private String clientVersion;
     private String clientBrand;
+
+    public Punishment() {
+        this.id = null;
+        this.playerUUID = null;
+        this.playerName = null;
+        this.type = null;
+        this.reason = null;
+        this.duration = 0;
+        this.startTime = 0;
+        this.executorUUID = null;
+        this.executorName = null;
+        this.createdAt = 0;
+    }
 
     public Punishment(UUID id, UUID playerUUID, String playerName, PunishmentType type,
                       String reason, long duration, UUID executorUUID, String executorName) {
@@ -51,7 +64,6 @@ public class Punishment {
         }
     }
 
-    // Getters and Setters
     public UUID getId() { return id; }
     public UUID getPlayerUUID() { return playerUUID; }
     public String getPlayerName() { return playerName; }

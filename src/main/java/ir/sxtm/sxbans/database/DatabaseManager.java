@@ -147,7 +147,7 @@ public class DatabaseManager {
                     stmt.close();
                 }
             } catch (SQLException e) {
-                // Ignore
+
             }
         }
         preparedStatements.clear();

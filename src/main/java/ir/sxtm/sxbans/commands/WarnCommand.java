@@ -30,25 +30,25 @@ public class WarnCommand extends BaseCommand {
         String playerName = args[0];
         String reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 
-        Player target = Bukkit.getPlayer(playerName);
-        if (target == null) {
+        Player onlineTarget = Bukkit.getPlayer(playerName);
+        UUID targetUUID = getPlayerUUID(playerName);
+        if (targetUUID == null) {
             sendMessage(sender, "error.player-not-found");
             return true;
         }
+        String targetName = getPlayerName(playerName);
 
-        // Check permission level
-        if (!checkPermissionLevel(sender, target)) {
+        if (!checkPermissionLevel(sender, targetUUID)) {
             return true;
         }
 
-        // Apply warn
         UUID executorUUID = sender instanceof Player ? ((Player) sender).getUniqueId() :
                 UUID.fromString("00000000-0000-0000-0000-000000000000");
         String executorName = sender.getName();
 
         Punishment punishment = plugin.getPunishmentManager().applyPunishment(
-                target.getUniqueId(),
-                target.getName(),
+                targetUUID,
+                targetName,
                 PunishmentType.WARN,
                 reason,
                 -1,
@@ -57,27 +57,22 @@ public class WarnCommand extends BaseCommand {
         );
 
         if (punishment != null) {
-            int warnings = plugin.getPunishmentManager().getWarningCount(target.getUniqueId());
+            int warnings = plugin.getPunishmentManager().getWarningCount(targetUUID);
             int maxWarnings = plugin.getConfigManager().getMaxWarnings();
 
             Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("player", target.getName());
+            placeholders.put("player", targetName);
             placeholders.put("count", String.valueOf(warnings));
             placeholders.put("max", String.valueOf(maxWarnings));
 
             sendMessage(sender, "success.warn", placeholders);
 
-            // Broadcast warning
-            if (plugin.getConfigManager().getBoolean("broadcast.warn", true)) {
-                broadcastPunishment(punishment);
+            if (onlineTarget != null) {
+                onlineTarget.sendMessage(plugin.getMessagesManager().getColoredMessage("punishment.warning-count", placeholders));
             }
 
-            // Show warning count to player
-            target.sendMessage(plugin.getMessagesManager().getColoredMessage("punishment.warning-count", placeholders));
-
-            // Check auto-ban
             if (warnings >= maxWarnings && plugin.getConfigManager().isAutoBanEnabled()) {
-                // Auto-ban will be handled by PunishmentManager
+
             }
         }
 

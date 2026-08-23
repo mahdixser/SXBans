@@ -119,7 +119,6 @@ public class PlayerController extends HttpServlet {
                     .max(Comparator.comparing(Punishment::getCreatedAt))
                     .ifPresent(p -> player.addProperty("lastPunishment", p.getCreatedAt()));
 
-            // ===== استفاده از Minotar با Fallback =====
             player.addProperty("headUrl", getPlayerHeadUrl(offlinePlayer.getUniqueId().toString(), 64));
 
             players.add(player);
@@ -152,7 +151,6 @@ public class PlayerController extends HttpServlet {
 
         List<Punishment> punishments = plugin.getPunishmentManager().getPlayerPunishments(uuid);
 
-        // تفکیک مجازات‌ها بر اساس نوع
         List<Punishment> bans = punishments.stream()
                 .filter(p -> p.getType() == Punishment.PunishmentType.BAN ||
                         p.getType() == Punishment.PunishmentType.TEMP_BAN)
@@ -189,7 +187,6 @@ public class PlayerController extends HttpServlet {
         response.addProperty("totalPunishments", punishments.size());
         response.addProperty("success", true);
 
-        // آمار
         response.addProperty("banCount", bans.size());
         response.addProperty("muteCount", mutes.size());
         response.addProperty("warnCount", warns.size());
@@ -197,14 +194,12 @@ public class PlayerController extends HttpServlet {
         response.addProperty("ipBanCount", ipBans.size());
         response.addProperty("ipMuteCount", ipMutes.size());
 
-        // مجازات‌های فعال
         List<Punishment> activePunishments = punishments.stream()
                 .filter(Punishment::isActive)
                 .collect(Collectors.toList());
         response.addProperty("activePunishmentsCount", activePunishments.size());
         response.add("activePunishments", gson.toJsonTree(activePunishments));
 
-        // همه مجازات‌ها با تفکیک
         response.add("bans", gson.toJsonTree(bans));
         response.add("mutes", gson.toJsonTree(mutes));
         response.add("warns", gson.toJsonTree(warns));
@@ -239,7 +234,6 @@ public class PlayerController extends HttpServlet {
 
         response.add("altAccounts", gson.toJsonTree(new ArrayList<>()));
 
-        // ===== استفاده از Minotar با Fallback =====
         response.addProperty("headUrl", getPlayerHeadUrl(uuid.toString(), 128));
 
         resp.getWriter().write(gson.toJson(response));
@@ -326,7 +320,6 @@ public class PlayerController extends HttpServlet {
         }
     }
 
-    // ===== متد کمکی برای دریافت هد با Minotar و Fallback =====
     private String getPlayerHeadUrl(String uuid, int size) {
         String baseUrl = "https://minotar.net/avatar/";
         String fallbackUuid = "00000000-0000-0000-0000-000000000000";

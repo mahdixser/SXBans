@@ -3,181 +3,324 @@
 # Support for hover messages with &h format
 
 # -------------------------------------------------------------------
+# PREFIX
+# -------------------------------------------------------------------
+prefix: '&8[&6SXBans&8] &7'
+
+# -------------------------------------------------------------------
 # BROADCAST MESSAGES WITH HOVER SUPPORT & PERMISSION
 # -------------------------------------------------------------------
 broadcast:
   ban:
-    message: '&c%player% &7was banned by &c%executor%'
+    message: '&c&l%player% &7ʜᴀs ʙᴇᴇɴ &c&lʙᴀɴɴᴇᴅ'
     broadcast_to_everyone: false
     permission: 'sxbans.admin.punishview.ban'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7Player: &f%player%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Duration: &f%duration%'
-      - '&7Date: &f%date%'
-      - '&7Server: &f%server%'
-      - '&6&l========================'
+      - '&c&lᴘʟᴀʏᴇʀ ʙᴀɴɴᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c🛠 &fᴘᴜɴɪsʜᴇᴅ ʙʏ &8→ &c%executor%'
 
   tempban:
-    message: '&c%player% &7was temporarily banned by &c%executor% &7(%duration%)'
+    message: '&c&l%player% &7ʜᴀs ʙᴇᴇɴ &c&lᴛᴇᴍᴘ-ʙᴀɴɴᴇᴅ'
     broadcast_to_everyone: true
     permission: 'sxbans.admin.punishview.tempban'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7Player: &f%player%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Duration: &f%duration%'
-      - '&7Expires: &f%expires%'
-      - '&7Date: &f%date%'
-      - '&7Server: &f%server%'
-      - '&6&l========================'
+      - '&c&lᴘʟᴀʏᴇʀ ᴛᴇᴍᴘᴏʀᴀʀɪʟʏ ʙᴀɴɴᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c⌚ &fᴅᴜʀᴀᴛɪᴏɴ &8→ &c%duration%'
+      - '&c🛠 &fᴘᴜɴɪsʜᴇᴅ ʙʏ &8→ &c%executor%'
 
   unban:
-    message: '&a%player% &7was unbanned by &a%executor%'
+    message: '&c&l%player%&7''s &c&lʙᴀɴ &7ʜᴀs ʙᴇᴇɴ &a&lʀᴇᴠᴏᴋᴇᴅ'
     broadcast_to_everyone: true
     permission: 'sxbans.admin.punishview.unban'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7Player: &f%player%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Date: &f%date%'
-      - '&6&l========================'
+      - '&c&lᴘʟᴀʏᴇʀ ᴜɴ-ʙᴀɴɴᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c🛠 &fʀᴇᴠᴏᴋᴇᴅ ʙʏ &8→ &c%executor%'
 
   mute:
-    message: '&c%player% &7was muted by &c%executor%'
+    message: '&c&l%player% &7ʜᴀs ʙᴇᴇɴ &c&lᴍᴜᴛᴇᴅ'
     broadcast_to_everyone: false
     permission: 'sxbans.admin.punishview.mute'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7Player: &f%player%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Duration: &f%duration%'
-      - '&7Date: &f%date%'
-      - '&7Server: &f%server%'
-      - '&6&l========================'
+      - '&c&lᴘʟᴀʏᴇʀ ᴍᴜᴛᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c🛠 &fᴍᴜᴛᴇᴅ ʙʏ &8→ &c%executor%'
 
   tempmute:
-    message: '&c%player% &7was temporarily muted by &c%executor% &7(%duration%)'
+    message: '&c&l%player% &7ʜᴀs ʙᴇᴇɴ &c&lᴛᴇᴍᴘ-ᴍᴜᴛᴇᴅ'
     broadcast_to_everyone: true
     permission: 'sxbans.admin.punishview.tempmute'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7Player: &f%player%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Duration: &f%duration%'
-      - '&7Expires: &f%expires%'
-      - '&7Date: &f%date%'
-      - '&7Server: &f%server%'
-      - '&6&l========================'
+      - '&c&lᴘʟᴀʏᴇʀ ᴛᴇᴍᴘᴏʀᴀʀɪʟʏ ᴍᴜᴛᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c⌚ &fᴅᴜʀᴀᴛɪᴏɴ &8→ &c%duration%'
+      - '&c🛠 &fᴍᴜᴛᴇᴅ ʙʏ &8→ &c%executor%'
 
   unmute:
-    message: '&a%player% &7was unmuted by &a%executor%'
+    message: '&c&l%player% &7ʜᴀs ʙᴇᴇɴ &c&lᴜɴ-ᴍᴜᴛᴇᴅ'
     broadcast_to_everyone: true
     permission: 'sxbans.admin.punishview.unmute'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7Player: &f%player%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Date: &f%date%'
-      - '&6&l========================'
+      - '&c&lᴘʟᴀʏᴇʀ ᴜɴ-ᴍᴜᴛᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c🛠 &fᴜɴᴍᴜᴛᴇᴅ ʙʏ &8→ &c%executor%'
 
   kick:
-    message: '&c%player% &7was kicked by &c%executor%'
+    message: '&c&l%player% &7ʜᴀs ʙᴇᴇɴ &c&lᴋɪᴄᴋᴇᴅ'
     broadcast_to_everyone: false
     permission: 'sxbans.admin.punishview.kick'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7Player: &f%player%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Date: &f%date%'
-      - '&7Server: &f%server%'
-      - '&6&l========================'
+      - '&c&lᴘʟᴀʏᴇʀ ᴋɪᴄᴋᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c🛠 &fᴋɪᴄᴋᴇᴅ ʙʏ &8→ &c%executor%'
 
   ipkick:
-    message: '&c%player% &7was IP kicked by &c%executor%'
+    message: '&c&l%player% &7ʜᴀs ʙᴇᴇɴ &c&lɪᴘ-ᴋɪᴄᴋᴇᴅ'
     broadcast_to_everyone: false
     permission: 'sxbans.admin.punishview.ipkick'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7Player: &f%player%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Date: &f%date%'
-      - '&7Server: &f%server%'
-      - '&6&l========================'
+      - '&c&lᴘʟᴀʏᴇʀ ɪᴘ ᴋɪᴄᴋᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c🛠 &fᴋɪᴄᴋᴇᴅ ʙʏ &8→ &c%executor%'
 
   warn:
-    message: '&c%player% &7was warned by &c%executor%'
+    message: '&c&l%player% &7ʜᴀs ʀᴇᴄᴇɪᴠᴇᴅ ᴀ &c&lᴡᴀʀɴɪɴɢ'
     broadcast_to_everyone: false
     permission: 'sxbans.admin.punishview.warn'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7Player: &f%player%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Date: &f%date%'
-      - '&7Server: &f%server%'
-      - '&6&l========================'
+      - '&c&lᴘʟᴀʏᴇʀ ᴡᴀʀɴᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c⌚ &fᴇxᴘɪʀʏ &8→ &c%duration%'
+      - '&c🛠 &fᴡᴀʀɴᴇᴅ ʙʏ &8→ &c%executor%'
 
   ipban:
-    message: '&cIP %ip% &7was banned by &c%executor%'
+    message: '&c&lɪᴘ %ip% &7ʜᴀs ʙᴇᴇɴ &c&lɪᴘ-ʙᴀɴɴᴇᴅ'
     broadcast_to_everyone: false
     permission: 'sxbans.admin.punishview.ipban'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7IP: &f%ip%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Date: &f%date%'
-      - '&7Server: &f%server%'
-      - '&6&l========================'
+      - '&c&lɪᴘ ʙᴀɴɴᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c🛠 &fᴘᴜɴɪsʜᴇᴅ ʙʏ &8→ &c%executor%'
 
   ipunban:
-    message: '&aIP %ip% &7was unbanned by &a%executor%'
+    message: '&a&lɪᴘ %ip% &7ʜᴀs ʙᴇᴇɴ &a&lɪᴘ-ᴜɴʙᴀɴɴᴇᴅ'
     broadcast_to_everyone: true
     permission: 'sxbans.admin.punishview.ipunban'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7IP: &f%ip%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Date: &f%date%'
-      - '&6&l========================'
+      - '&c&lɪᴘ ᴜɴ-ʙᴀɴɴᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c🛠 &fʀᴇᴠᴏᴋᴇᴅ ʙʏ &8→ &c%executor%'
 
   ipmute:
-    message: '&cIP %ip% &7was muted by &c%executor%'
+    message: '&c&lɪᴘ %ip% &7ʜᴀs ʙᴇᴇɴ &c&lɪᴘ-ᴍᴜᴛᴇᴅ'
     broadcast_to_everyone: false
     permission: 'sxbans.admin.punishview.ipmute'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7IP: &f%ip%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Date: &f%date%'
-      - '&7Server: &f%server%'
-      - '&6&l========================'
+      - '&c&lɪᴘ ᴍᴜᴛᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c🛠 &fᴍᴜᴛᴇᴅ ʙʏ &8→ &c%executor%'
 
   ipunmute:
-    message: '&aIP %ip% &7was unmuted by &a%executor%'
+    message: '&a&lɪᴘ %ip% &7ʜᴀs ʙᴇᴇɴ &a&lɪᴘ-ᴜɴᴍᴜᴛᴇᴅ'
     broadcast_to_everyone: true
     permission: 'sxbans.admin.punishview.ipunmute'
     hover:
-      - '&6&l=== SXBans Punishment ==='
-      - '&7IP: &f%ip%'
-      - '&7Executor: &f%executor%'
-      - '&7Reason: &f%reason%'
-      - '&7Date: &f%date%'
-      - '&6&l========================'
+      - '&c&lɪᴘ ᴜɴ-ᴍᴜᴛᴇᴅ!'
+      - '&c👤 &fᴘʟᴀʏᴇʀ &8→ &c%player%'
+      - '&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+      - '&c🛠 &fᴜɴᴍᴜᴛᴇᴅ ʙʏ &8→ &c%executor%'
 
 # -------------------------------------------------------------------
-# PREFIX
+# PUNISHMENT MESSAGES (shown to the player when punished)
 # -------------------------------------------------------------------
-prefix: '&8[&6SXBans&8] &7'
+punishment:
+  ban:
+    message: '&c&l❕ &c&lʏᴏᴜ''ʀᴇ ʙᴀɴɴᴇᴅ ꜰʀᴏᴍ ᴛʜᴇ sᴇʀᴠᴇʀ &c&l❕\n\n&c👤 &fᴜsᴇʀɴᴀᴍᴇ &8→ &c%player% &8←\n&c⌚ &fᴘᴜɴɪsʜᴇᴅ ᴏɴ &8→ &c%date% &8←\n&c🛠 &fᴘᴜɴɪsʜᴇᴅ ʙʏ &8→ &c%executor% &8←\n&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason% &8←\n\n&c📆 &fᴇxᴘɪʀʏ ᴅᴀᴛᴇ &8→ &c%expires% &8←\n&c⌛ &fᴇxᴘɪʀᴇs ɪɴ &8→ &c%duration% &8←'
+
+  kick:
+    message: '&c&l❕ &c&lʏᴏᴜ''ᴠᴇ ʙᴇᴇɴ ᴋɪᴄᴋᴇᴅ ꜰʀᴏᴍ ᴛʜᴇ sᴇʀᴠᴇʀ &c&l❕\n\n&c❌ &fᴋɪᴄᴋᴇᴅ ʙʏ &8→ &c%executor% &8←\n&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason% &8←'
+
+  mute:
+    message: '&c&l❕ &c&lʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ᴍᴜᴛᴇᴅ &c&l❕\n\n&c▪ &fᴍᴜᴛᴇᴅ ʙʏ &8→ &c%executor%\n&c▪ &fᴅᴜʀᴀᴛɪᴏɴ &8→ &c%duration%\n&c▪ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+
+  warn:
+    message: '&c&l❕ &c&lʏᴏᴜ ʜᴀᴠᴇ ʙᴇᴇɴ ᴡᴀʀɴᴇᴅ &c&l❕\n\n&c▪ &fᴡᴀʀɴᴇᴅ ʙʏ &8→ &c%executor%\n&c▪ &fᴇxᴘɪʀᴇs ɪɴ &8→ &c%duration%\n&c▪ &fʀᴇᴀsᴏɴ &8→ &c%reason%\n&c▪ &fᴀᴄᴛɪᴠᴇ ᴡᴀʀɴɪɴɢs &8→ &c%count%/%max%'
+
+  ipban:
+    message: '&c&l❕ &c&lʏᴏᴜʀ ʟᴏᴄᴀᴛɪᴏɴ ɪs ʙʟᴀᴄᴋʟɪsᴛᴇᴅ &c&l❕\n\n&c✎ &fʀᴇᴀsᴏɴ &8→ &c%reason% &8←'
+
+  ipmute:
+    message: '&c&l❕ &c&lʏᴏᴜʀ ɪᴘ ʜᴀs ʙᴇᴇɴ ᴍᴜᴛᴇᴅ &c&l❕\n\n&c▪ &fʀᴇᴀsᴏɴ &8→ &c%reason%'
+
+  warning-count:
+    message: '&eYou have &f%count%/%max% &ewarnings!'
+
+  auto-unban:
+    message: '&aYour ban has expired and you have been automatically unbanned!'
+
+  auto-unmute:
+    message: '&aYour mute has expired and you have been automatically unmuted!'
+
+  expired:
+    message: '&aYour &f%type% &ahas expired!'
+
+  mute:
+    filter: '&cYour message was blocked due to inappropriate language!'
+    wildcard: '&cYou are muted due to your username containing restricted words!'
+
+# -------------------------------------------------------------------
+# COMMAND MESSAGES
+# -------------------------------------------------------------------
+command:
+  ban:
+    usage: '&cUsᴀɢᴇ: &f/ban <ᴘʟᴀʏᴇʀ> <ʀᴇᴀsᴏɴ>'
+
+  tempban:
+    usage: '&cUsᴀɢᴇ: &f/tempban <ᴘʟᴀʏᴇʀ> <ᴛɪᴍᴇ> <ʀᴇᴀsᴏɴ>'
+
+  unban:
+    usage: '&cUsᴀɢᴇ: &f/unban <ᴘʟᴀʏᴇʀ>'
+
+  mute:
+    usage: '&cUsᴀɢᴇ: &f/mute <ᴘʟᴀʏᴇʀ> <ʀᴇᴀsᴏɴ>'
+
+  tempmute:
+    usage: '&cUsᴀɢᴇ: &f/tempmute <ᴘʟᴀʏᴇʀ> <ᴛɪᴍᴇ> <ʀᴇᴀsᴏɴ>'
+
+  unmute:
+    usage: '&cUsᴀɢᴇ: &f/unmute <ᴘʟᴀʏᴇʀ>'
+
+  kick:
+    usage: '&cUsᴀɢᴇ: &f/kick <ᴘʟᴀʏᴇʀ> <ʀᴇᴀsᴏɴ>'
+
+  warn:
+    usage: '&cUsᴀɢᴇ: &f/warn <ᴘʟᴀʏᴇʀ> <ʀᴇᴀsᴏɴ>'
+
+  history:
+    usage: '&cUsᴀɢᴇ: &f/history <ᴘʟᴀʏᴇʀ> [ᴘᴀɢᴇ]'
+
+  check:
+    usage: '&cUsᴀɢᴇ: &f/check <ᴘʟᴀʏᴇʀ>'
+
+  ipban:
+    usage: '&cUsᴀɢᴇ: &f/ipban <ᴘʟᴀʏᴇʀ/ɪᴘ> <ʀᴇᴀsᴏɴ>'
+
+  ipunban:
+    usage: '&cUsᴀɢᴇ: &f/ipunban <ɪᴘ>'
+
+  ipmute:
+    usage: '&cUsᴀɢᴇ: &f/ipmute <ᴘʟᴀʏᴇʀ/ɪᴘ> <ʀᴇᴀsᴏɴ>'
+
+  ipunmute:
+    usage: '&cUsᴀɢᴇ: &f/ipunmute <ɪᴘ>'
+
+# -------------------------------------------------------------------
+# ERROR MESSAGES
+# -------------------------------------------------------------------
+error:
+  no-permission: '&cYᴏᴜ ᴅᴏɴ''ᴛ ʜᴀᴠᴇ ᴘᴇʀᴍɪssɪᴏɴ!'
+  player-not-found: '&cPʟᴀʏᴇʀ ᴅᴏᴇs ɴᴏᴛ ᴇxɪsᴛ.'
+  already-banned: '&c%player% ɪs ᴀʟʀᴇᴀᴅʏ ʙᴀɴɴᴇᴅ!'
+  already-muted: '&c%player% ɪs ᴀʟʀᴇᴀᴅʏ ᴍᴜᴛᴇᴅ!'
+  not-banned: '&c%player% ɪs ɴᴏᴛ ʙᴀɴɴᴇᴅ!'
+  not-muted: '&c%player% ɪs ɴᴏᴛ ᴍᴜᴛᴇᴅ!'
+  ip-not-found: '&cɪᴘ ᴀᴅᴅʀᴇss ɴᴏᴛ ꜰᴏᴜɴᴅ ᴏʀ ɴᴏᴛ ʙᴀɴɴᴇᴅ!'
+  invalid-ip: '&cɪɴᴠᴀʟɪᴅ ɪᴘ ᴀᴅᴅʀᴇss ꜰᴏʀᴍᴀᴛ!'
+  invalid-time: '&cɴᴏ ᴠᴀʟɪᴅ ᴛɪᴍᴇ sᴘᴇᴄɪꜰɪᴄᴀᴛɪᴏɴ ᴅᴇᴛᴇᴄᴛᴇᴅ! Usᴇ: 1s, 1m, 1h, 1d, 1w, 1M, 1y'
+  higher-level: '&cYᴏᴜ ᴄᴀɴɴᴏᴛ ᴘᴜɴɪsʜ ᴛʜɪs ᴘʟᴀʏᴇʀ ʙᴇᴄᴀᴜsᴇ ᴛʜᴇʏ ʜᴀᴠᴇ ᴀ ʜɪɢʜᴇʀ/ᴇǫᴜᴀʟ ᴘᴇʀᴍɪssɪᴏɴ ʟᴇᴠᴇʟ!'
+  self-punish: '&cYᴏᴜ ᴄᴀɴɴᴏᴛ ᴘᴜɴɪsʜ ʏᴏᴜʀsᴇʟꜰ!'
+
+# -------------------------------------------------------------------
+# SUCCESS MESSAGES
+# -------------------------------------------------------------------
+success:
+  ban: '&a%player% ʜᴀs ʙᴇᴇɴ ʙᴀɴɴᴇᴅ!'
+  unban: '&a%player% ʜᴀs ʙᴇᴇɴ ᴜɴʙᴀɴɴᴇᴅ!'
+  mute: '&a%player% ʜᴀs ʙᴇᴇɴ ᴍᴜᴛᴇᴅ!'
+  unmute: '&a%player% ʜᴀs ʙᴇᴇɴ ᴜɴᴍᴜᴛᴇᴅ!'
+  kick: '&6%player% ʜᴀs ʙᴇᴇɴ ᴋɪᴄᴋᴇᴅ.'
+  warn: '&a%player% ʜᴀs ʙᴇᴇɴ ᴡᴀʀɴᴇᴅ! (&f%count%/%max%&a)'
+  ipban: '&aɪᴘ %ip% ʜᴀs ʙᴇᴇɴ ʙᴀɴɴᴇᴅ!'
+  ipunban: '&aɪᴘ %ip% ʜᴀs ʙᴇᴇɴ ᴜɴʙᴀɴɴᴇᴅ!'
+  ipmute: '&aɪᴘ %ip% ʜᴀs ʙᴇᴇɴ ᴍᴜᴛᴇᴅ!'
+  ipunmute: '&aɪᴘ %ip% ʜᴀs ʙᴇᴇɴ ᴜɴᴍᴜᴛᴇᴅ!'
+
+# -------------------------------------------------------------------
+# HISTORY MESSAGES
+# -------------------------------------------------------------------
+history:
+  header: '&f&m------------------------------'
+  title: '&aHɪsᴛᴏʀʏ ꜰᴏʀ &f%player%'
+  entry: '&c -- [&f%date% ᴀɢᴏ&c] --\n&f %player% ᴡᴀs &c%type% &fʙʏ %executor%: ''&b%reason%'''
+  footer: '&f&m------------------------------'
+  page: '&7Pᴀɢᴇ &f%page% &7ᴏꜰ &f%total%'
+  no-records: '&cɴᴏ ᴘᴜɴɪsʜᴍᴇɴᴛ ʀᴇᴄᴏʀᴅs ꜰᴏᴜɴᴅ ꜰᴏʀ &f%player%'
+
+# -------------------------------------------------------------------
+# CHECK MESSAGES
+# -------------------------------------------------------------------
+check:
+  title: '&c&l=== Pʟᴀʏᴇʀ Iɴꜰᴏ: &e%player% &c==='
+  status:
+    clean: '&aTʜɪs ᴘʟᴀʏᴇʀ ʜᴀs ɴᴏ ᴀᴄᴛɪᴠᴇ ᴘᴜɴɪsʜᴍᴇɴᴛs!'
+    banned: '&c&lʙᴀɴɴᴇᴅ &7- Rᴇᴀsᴏɴ: &f%reason% &7- Bʏ: &f%executor% &7- &f%duration%'
+    muted: '&e&lᴍᴜᴛᴇᴅ &7- Rᴇᴀsᴏɴ: &f%reason% &7- Bʏ: &f%executor% &7- &f%duration%'
+    warnings: '&eWᴀʀɴɪɴɢs: &f%count%/%max%'
+  ip: '&7ɪᴘ ᴀᴅᴅʀᴇss: &f%ip%'
+  last-login: '&7Lᴀsᴛ sᴇᴇɴ: &f%time%'
+  alt-accounts: '&eDᴇᴛᴇᴄᴛᴇᴅ &f%count% &eᴀʟᴛ ᴀᴄᴄᴏᴜɴᴛ(s) ᴏɴ ᴛʜɪs ɪᴘ!'
+
+# -------------------------------------------------------------------
+# RELOAD MESSAGES
+# -------------------------------------------------------------------
+reload:
+  config: '&aCᴏɴꜰɪɢᴜʀᴀᴛɪᴏɴ ʀᴇʟᴏᴀᴅᴇᴅ!'
+  messages: '&aMᴇssᴀɢᴇs ʀᴇʟᴏᴀᴅᴇᴅ!'
+  web-users: '&aWᴇʙ ᴜsᴇʀs ʀᴇʟᴏᴀᴅᴇᴅ!'
+  complete: '&a&lAʟʟ ᴄᴏɴꜰɪɢᴜʀᴀᴛɪᴏɴs ʀᴇʟᴏᴀᴅᴇᴅ sᴜᴄᴄᴇssꜰᴜʟʟʏ!'
+
+# -------------------------------------------------------------------
+# STATS MESSAGES
+# -------------------------------------------------------------------
+stats:
+  total-punishments: '&7Tᴏᴛᴀʟ Pᴜɴɪsʜᴍᴇɴᴛs: &f%count%'
+  active-bans: '&7Aᴄᴛɪᴠᴇ Bᴀɴs: &f%count%'
+  active-mutes: '&7Aᴄᴛɪᴠᴇ Mᴜᴛᴇs: &f%count%'
+  total-warnings: '&7Tᴏᴛᴀʟ Wᴀʀɴɪɴɢs: &f%count%'
+  web-status: '&7Wᴇʙ Sᴇʀᴠᴇʀ: %status%'
+  database-type: '&7Dᴀᴛᴀʙᴀsᴇ: &f%type%'
+
+# -------------------------------------------------------------------
+# APPEAL MESSAGES
+# -------------------------------------------------------------------
+appeal:
+  submitted: '&e%player% &7ʜᴀs sᴜʙᴍɪᴛᴛᴇᴅ ᴀ ʙᴀɴ ᴀᴘᴘᴇᴀʟ: &f%reason%'
+  approved: '&aYᴏᴜʀ ʙᴀɴ ᴀᴘᴘᴇᴀʟ ʜᴀs ʙᴇᴇɴ ᴀᴘᴘʀᴏᴠᴇᴅ! &7- &f%response%'
+  denied: '&cYᴏᴜʀ ʙᴀɴ ᴀᴘᴘᴇᴀʟ ʜᴀs ʙᴇᴇɴ ᴅᴇɴɪᴇᴅ! &7- &f%response%'
+  closed: '&eYᴏᴜʀ ʙᴀɴ ᴀᴘᴘᴇᴀʟ ʜᴀs ʙᴇᴇɴ ᴄʟᴏsᴇᴅ.'
+
+# -------------------------------------------------------------------
+# ALT DETECTION MESSAGES
+# -------------------------------------------------------------------
+alt-detection:
+  found: '&e&l[Aʟᴛ Dᴇᴛᴇᴄᴛɪᴏɴ] &7%player% &eʜᴀs &f%count% &eᴀʟᴛ ᴀᴄᴄᴏᴜɴᴛ(s)!'
+
+# -------------------------------------------------------------------
+# CONNECTION MESSAGES
+# -------------------------------------------------------------------
+connection:
+  limit: '&cTᴏᴏ ᴍᴀɴʏ ᴄᴏɴɴᴇᴄᴛɪᴏɴs ꜰʀᴏᴍ ʏᴏᴜʀ ɪᴘ! (Mᴀx: %max%)'

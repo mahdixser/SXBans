@@ -33,8 +33,6 @@ public class DashboardController extends HttpServlet {
                 return;
             }
 
-            plugin.getSXBansLogger().info("DashboardController doGet - path: " + path);
-
             if (path == null || path.equals("/")) {
                 handleDashboard(req, resp);
             } else if (path.equals("/stats")) {
@@ -95,7 +93,6 @@ public class DashboardController extends HttpServlet {
                 .collect(Collectors.toSet());
         response.addProperty("uniquePlayers", uniquePlayers.size());
 
-        plugin.getSXBansLogger().info("Dashboard response: totalPunishments=" + allPunishments.size());
         resp.getWriter().write(gson.toJson(response));
     }
 

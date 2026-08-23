@@ -8,27 +8,8 @@ import org.bukkit.OfflinePlayer;
 
 import java.util.UUID;
 
-/**
- * PlaceholderAPI integration for SX Bans.
- * Provides placeholders for punishment information.
- */
 public class PlaceholderAPIHook extends PlaceholderExpansion {
     private final SXBans plugin;
-
-    // Placeholders:
-    // %sxbans_banned% - Returns "true" or "false"
-    // %sxbans_muted% - Returns "true" or "false"
-    // %sxbans_warnings% - Returns number of warnings
-    // %sxbans_ban_reason% - Returns ban reason
-    // %sxbans_mute_reason% - Returns mute reason
-    // %sxbans_ban_duration% - Returns ban duration
-    // %sxbans_mute_duration% - Returns mute duration
-    // %sxbans_ban_executor% - Returns ban executor name
-    // %sxbans_mute_executor% - Returns mute executor name
-    // %sxbans_ban_time% - Returns ban time
-    // %sxbans_mute_time% - Returns mute time
-    // %sxbans_total_punishments% - Returns total punishments
-    // %sxbans_active_punishments% - Returns active punishments
 
     public PlaceholderAPIHook(SXBans plugin) {
         this.plugin = plugin;
@@ -125,11 +106,6 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
         }
     }
 
-    /**
-     * Handle placeholder requests for offline players.
-     * Note: This method may not exist in all versions of PlaceholderAPI.
-     * Remove @Override if this method doesn't exist in the parent class.
-     */
     public String onPlaceholderRequest(OfflinePlayer player, String params) {
         if (player == null || !player.hasPlayedBefore()) {
             return "";
@@ -155,9 +131,6 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
         }
     }
 
-    /**
-     * Register the expansion with PlaceholderAPI.
-     */
     public void registerExpansion() {
         if (this.register()) {
             plugin.getSXBansLogger().info("PlaceholderAPI expansion registered");
@@ -166,13 +139,6 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
         }
     }
 
-    /**
-     * Format a message with placeholders.
-     *
-     * @param player The player
-     * @param message The message to format
-     * @return The formatted message
-     */
     public String formatPlaceholders(Player player, String message) {
         return me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, message);
     }

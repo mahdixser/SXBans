@@ -18,7 +18,6 @@ public class JSONStorage {
     private final ObjectMapper mapper;
     private final ReentrantReadWriteLock lock;
 
-    // Sub-directories
     private final File punishmentsDir;
     private final File historyDir;
     private final File ipDataDir;
@@ -32,7 +31,6 @@ public class JSONStorage {
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         this.lock = new ReentrantReadWriteLock();
 
-        // Create directories
         this.punishmentsDir = new File(dataDir, "punishments");
         this.historyDir = new File(dataDir, "history");
         this.ipDataDir = new File(dataDir, "ipdata");
@@ -49,7 +47,6 @@ public class JSONStorage {
         if (!settingsDir.exists()) settingsDir.mkdirs();
     }
 
-    // Punishment methods
     public void savePunishment(Punishment punishment) {
         lock.writeLock().lock();
         try {
@@ -85,7 +82,7 @@ public class JSONStorage {
                     try {
                         punishments.add(mapper.readValue(file, Punishment.class));
                     } catch (IOException e) {
-                        // Skip corrupted files
+
                     }
                 }
             }
@@ -108,7 +105,7 @@ public class JSONStorage {
                             result.add(p);
                         }
                     } catch (IOException e) {
-                        // Skip corrupted files
+
                     }
                 }
             }
@@ -134,7 +131,6 @@ public class JSONStorage {
         savePunishment(punishment);
     }
 
-    // History methods
     public void saveHistory(HistoryEntry entry) {
         lock.writeLock().lock();
         try {
@@ -160,7 +156,7 @@ public class JSONStorage {
                             history.add(entry);
                         }
                     } catch (IOException e) {
-                        // Skip corrupted files
+
                     }
                 }
             }
@@ -181,7 +177,7 @@ public class JSONStorage {
                     try {
                         history.add(mapper.readValue(file, HistoryEntry.class));
                     } catch (IOException e) {
-                        // Skip corrupted files
+
                     }
                 }
             }
@@ -192,7 +188,6 @@ public class JSONStorage {
         }
     }
 
-    // IP Data methods
     public void saveIPData(IPData ipData) {
         lock.writeLock().lock();
         try {
@@ -230,7 +225,7 @@ public class JSONStorage {
                     try {
                         ipDataList.add(mapper.readValue(file, IPData.class));
                     } catch (IOException e) {
-                        // Skip corrupted files
+
                     }
                 }
             }
@@ -240,7 +235,6 @@ public class JSONStorage {
         }
     }
 
-    // Settings methods
     public void saveSetting(String key, Object value) {
         lock.writeLock().lock();
         try {
@@ -278,7 +272,6 @@ public class JSONStorage {
         }
     }
 
-    // Utility methods
     public void backup() {
         lock.readLock().lock();
         try {

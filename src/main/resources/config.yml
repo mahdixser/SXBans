@@ -34,6 +34,28 @@ redis:
   database: 0
 
 # -------------------------------------------------------------------
+# NETWORK SETTINGS
+# This section is for multi-server networks (survival, skyblock, lobby, ...) and for
+# building Velocity/BungeeCord-side plugins that hook into SXBans.
+# -------------------------------------------------------------------
+network:
+  # This server's name on the network. This is the name sent as "server" in the web panel,
+  # logs, and Redis messages. For example, if this plugin is installed on the survival server:
+  # server-name: survival
+  server-name: 'game-server'
+
+  # If you've connected multiple Spigot/Paper servers together via a shared Redis (redis.enabled: true)
+  # and you want punishments (ban/mute/unban/...) to sync across all servers, turn this on.
+  # This is fully proxy-agnostic - it works with both BungeeCord and Velocity,
+  # since it uses Redis pub/sub instead of plugin messaging.
+  sync-punishments: true
+
+  # The BungeeCord/Waterfall-side plugin messaging channel (optional, alongside Redis).
+  # If the server is behind BungeeCord and you want to use this channel in addition to Redis, enable it.
+  bungee-messaging:
+    enabled: false
+
+# -------------------------------------------------------------------
 # WEB SERVER SETTINGS
 # -------------------------------------------------------------------
 web:

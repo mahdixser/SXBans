@@ -15,7 +15,6 @@ public class MessageUtils {
     private final SXBans plugin;
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
 
-    // ===== HARD-CODED PERMISSIONS (غیرقابل تغییر توسط کاربر) =====
     private static final Map<String, String> PUNISHMENT_PERMISSIONS = new HashMap<>();
 
     static {

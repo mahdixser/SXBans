@@ -108,29 +108,24 @@ public class SettingsController extends HttpServlet {
     private void handleGetSettings(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         JsonObject settings = new JsonObject();
 
-        // Database settings
         settings.addProperty("databaseType", plugin.getConfigManager().getDatabaseType());
         settings.addProperty("databaseHost", plugin.getConfigManager().getString("database.host", "localhost"));
         settings.addProperty("databasePort", plugin.getConfigManager().getInt("database.port", 3306));
         settings.addProperty("databaseName", plugin.getConfigManager().getString("database.name", "sxbans"));
 
-        // Web settings
         settings.addProperty("webEnabled", plugin.getConfigManager().isWebEnabled());
         settings.addProperty("webPort", plugin.getConfigManager().getWebPort());
         settings.addProperty("webHost", plugin.getConfigManager().getWebHost());
 
-        // Punishment settings
         settings.addProperty("maxWarnings", plugin.getConfigManager().getMaxWarnings());
         settings.addProperty("warningExpiry", plugin.getConfigManager().getWarningExpiry());
         settings.addProperty("autoBanEnabled", plugin.getConfigManager().isAutoBanEnabled());
         settings.addProperty("autoBanDuration", plugin.getConfigManager().getAutoBanDuration());
 
-        // Logging settings
         settings.addProperty("consoleLogging", plugin.getConfigManager().isConsoleLogging());
         settings.addProperty("fileLogging", plugin.getConfigManager().isFileLogging());
         settings.addProperty("webLogging", plugin.getConfigManager().isWebLogging());
 
-        // Redis settings
         settings.addProperty("redisEnabled", plugin.getConfigManager().isRedisEnabled());
         settings.addProperty("redisHost", plugin.getConfigManager().getString("redis.host", "localhost"));
         settings.addProperty("redisPort", plugin.getConfigManager().getInt("redis.port", 6379));
@@ -141,7 +136,6 @@ public class SettingsController extends HttpServlet {
     private void handleUpdateSettings(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         JsonObject body = parseBody(req);
 
-        // Update config values using FileConfiguration
         if (body.has("maxWarnings")) {
             plugin.getConfigManager().getConfig().set("punishments.max-warnings", body.get("maxWarnings").getAsInt());
         }

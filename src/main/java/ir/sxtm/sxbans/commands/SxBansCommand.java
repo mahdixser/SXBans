@@ -53,19 +53,16 @@ public class SxBansCommand extends BaseCommand {
 
     private void handleReload(CommandSender sender) {
         try {
-            // Reload config
+
             plugin.getConfigManager().reloadConfig();
             sender.sendMessage(plugin.getMessagesManager().getColoredMessage("reload.config"));
 
-            // Reload messages
             plugin.getMessagesManager().reloadMessages();
             sender.sendMessage(plugin.getMessagesManager().getColoredMessage("reload.messages"));
 
-            // Reload web users
             plugin.getWebUsersManager().loadUsers();
             sender.sendMessage(plugin.getMessagesManager().getColoredMessage("reload.web-users"));
 
-            // Reload templates
             plugin.getTemplateManager().reloadTemplates();
             sender.sendMessage("&aTemplates reloaded!");
 
@@ -78,38 +75,32 @@ public class SxBansCommand extends BaseCommand {
     private void handleStats(CommandSender sender) {
         Map<String, String> placeholders = new HashMap<>();
 
-        // Total punishments
         int totalPunishments = plugin.getPunishmentManager().getAllActivePunishments().size();
         placeholders.put("count", String.valueOf(totalPunishments));
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("stats.total-punishments", placeholders));
 
-        // Active bans
         int activeBans = plugin.getPunishmentManager().getAllActivePunishments().stream()
                 .filter(p -> p.getType().toString().contains("BAN"))
                 .toArray().length;
         placeholders.put("count", String.valueOf(activeBans));
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("stats.active-bans", placeholders));
 
-        // Active mutes
         int activeMutes = plugin.getPunishmentManager().getAllActivePunishments().stream()
                 .filter(p -> p.getType().toString().contains("MUTE"))
                 .toArray().length;
         placeholders.put("count", String.valueOf(activeMutes));
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("stats.active-mutes", placeholders));
 
-        // Total warnings
         int totalWarnings = plugin.getPunishmentManager().getAllActivePunishments().stream()
                 .filter(p -> p.getType().toString().contains("WARN"))
                 .toArray().length;
         placeholders.put("count", String.valueOf(totalWarnings));
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("stats.total-warnings", placeholders));
 
-        // Web server status
         boolean webEnabled = plugin.getConfigManager().isWebEnabled();
         placeholders.put("status", webEnabled ? "&aEnabled" : "&cDisabled");
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("stats.web-status", placeholders));
 
-        // Database type
         DatabaseManager.DatabaseType dbType = plugin.getDatabaseManager().getType();
         placeholders.put("type", dbType.getName());
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("stats.database-type", placeholders));
@@ -158,34 +149,71 @@ public class SxBansCommand extends BaseCommand {
     }
 
     private void handleBackup(CommandSender sender) {
+
         sender.sendMessage("&aCreating backup...");
-        // This would need to implement backup functionality
-        sender.sendMessage("&aBackup created successfully!");
+        try {
+            java.io.File backupDir = new java.io.File(plugin.getDataFolder(), "backups");
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
+            }
+
+            java.util.List<Punishment> allPunishments = plugin.getPunishmentStorage().getAllPunishments();
+            String fileName = "backup-" + new java.text.SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new java.util.Date()) + ".json";
+            java.io.File backupFile = new java.io.File(backupDir, fileName);
+
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT);
+            mapper.writeValue(backupFile, allPunishments);
+
+            sender.sendMessage("&aBackup created successfully! (" + allPunishments.size() + " punishments) -> backups/" + fileName);
+            plugin.getSXBansLogger().info("Backup created by " + sender.getName() + ": " + fileName);
+        } catch (Exception e) {
+            sender.sendMessage("&cFailed to create backup: " + e.getMessage());
+            plugin.getSXBansLogger().severe("Backup failed: " + e.getMessage());
+        }
     }
+
+    private final Map<String, Long> pendingClearAllConfirmations = new HashMap<>();
+    private static final long CONFIRM_TIMEOUT_MS = 30_000;
 
     private void handleClear(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("&cUsage: /sxbans clear <all|player>");
+            sender.sendMessage("&cUsage: /sxbans clear <all|player> [name]");
             return;
         }
 
         String target = args[1].toLowerCase();
 
         if (target.equals("all")) {
-            sender.sendMessage("&cThis will clear ALL punishments. Are you sure? Use /sxbans clear confirm");
+            pendingClearAllConfirmations.put(sender.getName(), System.currentTimeMillis());
+            sender.sendMessage("&cThis will PERMANENTLY delete ALL punishments from the database. " +
+                    "This cannot be undone. Run /sxbans clear confirm within 30 seconds to proceed.");
             return;
         }
 
         if (target.equals("confirm")) {
-            // Clear all punishments
-            // This would need to implement clear functionality
-            sender.sendMessage("&aAll punishments cleared!");
+            Long requestedAt = pendingClearAllConfirmations.remove(sender.getName());
+            if (requestedAt == null || System.currentTimeMillis() - requestedAt > CONFIRM_TIMEOUT_MS) {
+                sender.sendMessage("&cNo pending clear-all request (or it expired). Run /sxbans clear all first.");
+                return;
+            }
+
+            int removed = plugin.getPunishmentManager().clearAllData();
+            sender.sendMessage("&aAll punishments cleared! (" + removed + " records removed)");
+            plugin.getSXBansLogger().severe(sender.getName() + " cleared ALL punishment data (" + removed + " records)");
             return;
         }
 
-        // Clear specific player
-        // This would need to implement player clear functionality
-        sender.sendMessage("&aCleared punishments for " + target);
+        String playerName = target.equals("player") && args.length >= 3 ? args[2] : args[1];
+        UUID targetUUID = org.bukkit.Bukkit.getOfflinePlayer(playerName).getUniqueId();
+        int removed = plugin.getPunishmentManager().clearPlayerData(targetUUID);
+
+        if (removed > 0) {
+            sender.sendMessage("&aCleared " + removed + " punishment(s) for " + playerName);
+            plugin.getSXBansLogger().severe(sender.getName() + " cleared " + removed + " punishments for " + playerName);
+        } else {
+            sender.sendMessage("&7No punishments found for " + playerName);
+        }
     }
 
     @Override

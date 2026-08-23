@@ -31,12 +31,13 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        String ip = player.getAddress().getAddress().getHostAddress();
 
-        // Track IP
+        if (player.getAddress() == null || player.getAddress().getAddress() == null) {
+            return;
+        }
+        String ip = player.getAddress().getAddress().getHostAddress();
         ipTracker.trackIP(ip, uuid, player.getName());
 
-        // Check for active bans
         if (plugin.getPunishmentManager().isPlayerBanned(uuid)) {
             Punishment ban = plugin.getPunishmentManager().getActiveBan(uuid);
             if (ban != null) {
@@ -45,18 +46,16 @@ public class PlayerListener implements Listener {
             }
         }
 
-        // Check for IP bans
         if (plugin.getPunishmentManager().isIpBanned(ip)) {
             player.kickPlayer(plugin.getMessagesManager().getColoredMessage("punishment.ipban.message",
                     Map.of("reason", "Your IP address has been banned")));
             return;
         }
 
-        // Check for alt accounts
         if (plugin.getConfigManager().getBoolean("alt-detection.enabled", true)) {
             Set<UUID> alts = altDetector.detectAlts(player);
             if (!alts.isEmpty()) {
-                // Notify staff
+
                 String message = plugin.getMessagesManager().getColoredMessage("alt-detection.found",
                         Map.of("player", player.getName(), "count", String.valueOf(alts.size())));
 
@@ -66,13 +65,12 @@ public class PlayerListener implements Listener {
             }
         }
 
-        // Check for pending scheduled punishments
         if (plugin.getScheduledPunishmentManager() != null) {
             var scheduled = plugin.getScheduledPunishmentManager()
                     .getScheduledPunishmentsForPlayer(uuid);
             for (var sp : scheduled) {
                 if (sp.getScheduledTime() <= System.currentTimeMillis()) {
-                    // Execute immediately
+
                     plugin.getScheduledPunishmentManager().executeScheduledPunishment(sp);
                 }
             }
@@ -84,7 +82,9 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        // Update last seen in IP data
+        if (player.getAddress() == null || player.getAddress().getAddress() == null) {
+            return;
+        }
         String ip = player.getAddress().getAddress().getHostAddress();
         var ipData = ipTracker.getIPData(ip);
         if (ipData != null) {

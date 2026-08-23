@@ -31,38 +31,35 @@ public class TempBanCommand extends BaseCommand {
         String timeStr = args[1];
         String reason = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
 
-        Player target = Bukkit.getPlayer(playerName);
-        if (target == null) {
+        UUID targetUUID = getPlayerUUID(playerName);
+        if (targetUUID == null) {
             sendMessage(sender, "error.player-not-found");
             return true;
         }
+        String targetName = getPlayerName(playerName);
 
-        // Check permission level
-        if (!checkPermissionLevel(sender, target)) {
+        if (!checkPermissionLevel(sender, targetUUID)) {
             return true;
         }
 
-        // Check if already banned
-        if (plugin.getPunishmentManager().isPlayerBanned(target.getUniqueId())) {
-            sendMessage(sender, "error.already-banned", Map.of("player", target.getName()));
+        if (plugin.getPunishmentManager().isPlayerBanned(targetUUID)) {
+            sendMessage(sender, "error.already-banned", Map.of("player", targetName));
             return true;
         }
 
-        // Parse time
         long duration = parseTime(timeStr);
         if (duration <= 0) {
             sendMessage(sender, "error.invalid-time");
             return true;
         }
 
-        // Apply temp ban
         UUID executorUUID = sender instanceof Player ? ((Player) sender).getUniqueId() :
                 UUID.fromString("00000000-0000-0000-0000-000000000000");
         String executorName = sender.getName();
 
         Punishment punishment = plugin.getPunishmentManager().applyPunishment(
-                target.getUniqueId(),
-                target.getName(),
+                targetUUID,
+                targetName,
                 PunishmentType.TEMP_BAN,
                 reason,
                 duration,
@@ -72,10 +69,10 @@ public class TempBanCommand extends BaseCommand {
 
         if (punishment != null) {
             Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("player", target.getName());
+            placeholders.put("player", targetName);
             placeholders.put("duration", formatTime(duration));
             sendMessage(sender, "success.ban", placeholders);
-            broadcastPunishment(punishment);
+
         }
 
         return true;

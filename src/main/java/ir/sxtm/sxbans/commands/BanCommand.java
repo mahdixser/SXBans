@@ -30,31 +30,29 @@ public class BanCommand extends BaseCommand {
         String playerName = args[0];
         String reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 
-        Player target = Bukkit.getPlayer(playerName);
-        if (target == null) {
+        UUID targetUUID = getPlayerUUID(playerName);
+        if (targetUUID == null) {
             sendMessage(sender, "error.player-not-found");
             return true;
         }
+        String targetName = getPlayerName(playerName);
 
-        // Check permission level
-        if (!checkPermissionLevel(sender, target)) {
+        if (!checkPermissionLevel(sender, targetUUID)) {
             return true;
         }
 
-        // Check if already banned
-        if (plugin.getPunishmentManager().isPlayerBanned(target.getUniqueId())) {
-            sendMessage(sender, "error.already-banned", Map.of("player", target.getName()));
+        if (plugin.getPunishmentManager().isPlayerBanned(targetUUID)) {
+            sendMessage(sender, "error.already-banned", Map.of("player", targetName));
             return true;
         }
 
-        // Apply ban
         UUID executorUUID = sender instanceof Player ? ((Player) sender).getUniqueId() :
                 UUID.fromString("00000000-0000-0000-0000-000000000000");
         String executorName = sender.getName();
 
         Punishment punishment = plugin.getPunishmentManager().applyPunishment(
-                target.getUniqueId(),
-                target.getName(),
+                targetUUID,
+                targetName,
                 PunishmentType.BAN,
                 reason,
                 -1,
@@ -63,8 +61,8 @@ public class BanCommand extends BaseCommand {
         );
 
         if (punishment != null) {
-            sendMessage(sender, "success.ban", Map.of("player", target.getName()));
-            broadcastPunishment(punishment);
+            sendMessage(sender, "success.ban", Map.of("player", targetName));
+
         }
 
         return true;

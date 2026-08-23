@@ -36,12 +36,10 @@ public class KickCommand extends BaseCommand {
             return true;
         }
 
-        // Check permission level
         if (!checkPermissionLevel(sender, target)) {
             return true;
         }
 
-        // Apply kick
         UUID executorUUID = sender instanceof Player ? ((Player) sender).getUniqueId() :
                 UUID.fromString("00000000-0000-0000-0000-000000000000");
         String executorName = sender.getName();
@@ -58,7 +56,7 @@ public class KickCommand extends BaseCommand {
 
         if (punishment != null) {
             sendMessage(sender, "success.kick", Map.of("player", target.getName()));
-            broadcastPunishment(punishment);
+
         }
 
         return true;

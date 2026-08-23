@@ -27,18 +27,33 @@ public class ConfigManager {
             plugin.saveResource("config.yml", false);
         }
 
-        config = YamlConfiguration.loadConfiguration(configFile);
-        loadDefaults();
+        loadFromResourceDefaults();
         cacheAllValues();
     }
 
-    // ADD THIS METHOD - returns the FileConfiguration
+    private void loadFromResourceDefaults() {
+
+        config = YamlConfiguration.loadConfiguration(configFile);
+
+        try (java.io.InputStream defaultStream = plugin.getResource("config.yml")) {
+            if (defaultStream != null) {
+                YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(
+                        new java.io.InputStreamReader(defaultStream, java.nio.charset.StandardCharsets.UTF_8));
+                config.setDefaults(defaultConfig);
+            }
+        } catch (Exception e) {
+            plugin.getSXBansLogger().severe("Failed to load config.yml resource defaults: " + e.getMessage());
+        }
+
+        loadDefaults();
+    }
+
     public FileConfiguration getConfig() {
         return config;
     }
 
     private void loadDefaults() {
-        // Database settings
+
         config.addDefault("database.type", "json");
         config.addDefault("database.host", "localhost");
         config.addDefault("database.port", 3306);
@@ -46,7 +61,6 @@ public class ConfigManager {
         config.addDefault("database.username", "root");
         config.addDefault("database.password", "");
 
-        // Web server settings
         config.addDefault("web.enabled", true);
         config.addDefault("web.port", 8080);
         config.addDefault("web.host", "0.0.0.0");
@@ -54,14 +68,16 @@ public class ConfigManager {
         config.addDefault("web.ssl.keystore", "");
         config.addDefault("web.ssl.password", "");
 
-        // Redis settings
         config.addDefault("redis.enabled", false);
         config.addDefault("redis.host", "localhost");
         config.addDefault("redis.port", 6379);
         config.addDefault("redis.password", "");
         config.addDefault("redis.database", 0);
 
-        // Punishment settings
+        config.addDefault("network.server-name", "game-server");
+        config.addDefault("network.sync-punishments", true);
+        config.addDefault("network.bungee-messaging.enabled", false);
+
         config.addDefault("punishments.max-warnings", 5);
         config.addDefault("punishments.warning-expiry", 2592000000L);
         config.addDefault("punishments.auto-ban.enabled", true);
@@ -69,7 +85,6 @@ public class ConfigManager {
         config.addDefault("punishments.temp-ban.default-duration", 86400000L);
         config.addDefault("punishments.temp-mute.default-duration", 3600000L);
 
-        // Logging settings
         config.addDefault("logging.console", true);
         config.addDefault("logging.file", true);
         config.addDefault("logging.file.format", "json");
@@ -89,13 +104,16 @@ public class ConfigManager {
     }
 
     public void reloadConfig() {
-        config = YamlConfiguration.loadConfiguration(configFile);
+
+        loadFromResourceDefaults();
         cacheAllValues();
     }
 
     public void saveConfig() {
-        try {
-            config.save(configFile);
+
+        try (java.io.Writer writer = new java.io.OutputStreamWriter(
+                new java.io.FileOutputStream(configFile), java.nio.charset.StandardCharsets.UTF_8)) {
+            writer.write(config.saveToString());
         } catch (Exception e) {
             plugin.getSXBansLogger().severe("Failed to save config: " + e.getMessage());
         }
@@ -145,7 +163,6 @@ public class ConfigManager {
         return config.contains(path);
     }
 
-    // Database specific methods
     public String getDatabaseType() {
         return getString("database.type", "json");
     }
@@ -164,6 +181,18 @@ public class ConfigManager {
 
     public boolean isRedisEnabled() {
         return getBoolean("redis.enabled", false);
+    }
+
+    public String getServerName() {
+        return getString("network.server-name", "game-server");
+    }
+
+    public boolean isNetworkSyncEnabled() {
+        return isRedisEnabled() && getBoolean("network.sync-punishments", true);
+    }
+
+    public boolean isBungeeMessagingEnabled() {
+        return getBoolean("network.bungee-messaging.enabled", false);
     }
 
     public int getMaxWarnings() {

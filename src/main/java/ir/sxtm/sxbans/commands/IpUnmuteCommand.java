@@ -28,19 +28,16 @@ public class IpUnmuteCommand extends BaseCommand {
     protected boolean execute(CommandSender sender, String[] args) {
         String ip = args[0];
 
-        // Validate IP format
         if (!ip.matches("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")) {
             sendMessage(sender, "error.invalid-ip");
             return true;
         }
 
-        // Check if IP is muted
         if (!plugin.getPunishmentManager().isIpMuted(ip)) {
             sendMessage(sender, "error.ip-not-found");
             return true;
         }
 
-        // Get active IP mute
         Punishment ipMute = null;
         for (Punishment p : plugin.getPunishmentManager().getAllActivePunishments()) {
             if (p.getType() == Punishment.PunishmentType.IP_MUTE &&
@@ -55,7 +52,6 @@ public class IpUnmuteCommand extends BaseCommand {
             return true;
         }
 
-        // Remove IP mute
         UUID removerUUID = sender instanceof Player ? ((Player) sender).getUniqueId() :
                 UUID.fromString("00000000-0000-0000-0000-000000000000");
         String removerName = sender.getName();
@@ -71,9 +67,6 @@ public class IpUnmuteCommand extends BaseCommand {
         if (success) {
             sendMessage(sender, "success.ipunmute", Map.of("ip", ip));
 
-            String broadcast = plugin.getMessagesManager().getColoredMessage("broadcast.ipunmute",
-                    Map.of("ip", ip, "executor", removerName));
-            Bukkit.broadcastMessage(broadcast);
         }
 
         return true;
@@ -87,9 +80,9 @@ public class IpUnmuteCommand extends BaseCommand {
     @Override
     protected List<String> tabComplete(CommandSender sender, String[] args) {
         if (args.length == 1) {
-            // Get all muted IPs
+
             List<String> mutedIPs = new ArrayList<>();
-            // This would need to get from storage
+
             return mutedIPs;
         }
         return Collections.emptyList();

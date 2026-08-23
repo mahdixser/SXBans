@@ -39,7 +39,8 @@ public class CheckCommand extends BaseCommand {
         if (target != null) {
             targetUUID = target.getUniqueId();
             name = target.getName();
-            ip = target.getAddress().getAddress().getHostAddress();
+            ip = (target.getAddress() != null && target.getAddress().getAddress() != null)
+                    ? target.getAddress().getAddress().getHostAddress() : "Unknown";
         } else {
             targetUUID = getPlayerUUID(playerName);
             name = playerName;
@@ -51,12 +52,10 @@ public class CheckCommand extends BaseCommand {
             return true;
         }
 
-        // Send player info header
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("check.title",
                 Map.of("player", name)));
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("history.header"));
 
-        // Check ban status
         if (plugin.getPunishmentManager().isPlayerBanned(targetUUID)) {
             Punishment ban = plugin.getPunishmentManager().getActiveBan(targetUUID);
             if (ban != null) {
@@ -70,7 +69,6 @@ public class CheckCommand extends BaseCommand {
             sender.sendMessage(plugin.getMessagesManager().getColoredMessage("check.status.clean"));
         }
 
-        // Check mute status
         if (plugin.getPunishmentManager().isPlayerMuted(targetUUID)) {
             Punishment mute = plugin.getPunishmentManager().getActiveMute(targetUUID);
             if (mute != null) {
@@ -82,17 +80,14 @@ public class CheckCommand extends BaseCommand {
             }
         }
 
-        // Show warnings
         int warnings = plugin.getPunishmentManager().getWarningCount(targetUUID);
         int maxWarnings = plugin.getConfigManager().getMaxWarnings();
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("check.status.warnings",
                 Map.of("count", String.valueOf(warnings), "max", String.valueOf(maxWarnings))));
 
-        // Show IP info
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("check.ip",
                 Map.of("ip", ip)));
 
-        // Show IP data if available
         if (!"Unknown".equals(ip)) {
             IPData ipData = plugin.getIPTracker().getIPData(ip);
             if (ipData != null) {

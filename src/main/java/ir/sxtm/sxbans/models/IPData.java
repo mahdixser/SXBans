@@ -19,6 +19,12 @@ public class IPData {
     private int totalPunishments;
     private boolean isBlacklisted;
 
+    public IPData() {
+        this.ipAddress = null;
+        this.playerUUIDs = new HashSet<>();
+        this.playerNames = new HashSet<>();
+    }
+
     public IPData(String ipAddress) {
         this.ipAddress = ipAddress;
         this.playerUUIDs = new HashSet<>();
@@ -30,7 +36,6 @@ public class IPData {
         this.isBlacklisted = false;
     }
 
-    // Getters and Setters
     public String getIpAddress() { return ipAddress; }
     public Set<UUID> getPlayerUUIDs() { return playerUUIDs; }
     public Set<String> getPlayerNames() { return playerNames; }
@@ -44,7 +49,6 @@ public class IPData {
     public void setHostname(String hostname) { this.hostname = hostname; }
     public long getFirstSeen() { return firstSeen; }
 
-    // اضافه کردن متد setFirstSeen برای رفع ارور
     public void setFirstSeen(long firstSeen) { this.firstSeen = firstSeen; }
 
     public long getLastSeen() { return lastSeen; }

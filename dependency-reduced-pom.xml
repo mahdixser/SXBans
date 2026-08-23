@@ -4,7 +4,7 @@
   <groupId>ir.sxtm</groupId>
   <artifactId>SXBans</artifactId>
   <name>SX Bans</name>
-  <version>0.53b</version>
+  <version>1.61-Release</version>
   <build>
     <resources>
       <resource>

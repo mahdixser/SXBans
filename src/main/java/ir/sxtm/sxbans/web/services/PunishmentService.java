@@ -23,7 +23,6 @@ public class PunishmentService {
     public WebResponse getPunishments(int page, int limit, String type, String status, String player, String sort, String order) {
         List<Punishment> punishments = plugin.getPunishmentStorage().getAllPunishments();
 
-        // Filter
         if (type != null && !type.isEmpty()) {
             try {
                 PunishmentType filterType = PunishmentType.valueOf(type.toUpperCase());
@@ -48,7 +47,6 @@ public class PunishmentService {
                     .collect(Collectors.toList());
         }
 
-        // Sort
         if (sort != null) {
             boolean ascending = "asc".equalsIgnoreCase(order);
             punishments.sort((a, b) -> {
@@ -80,7 +78,6 @@ public class PunishmentService {
             punishments.sort((a, b) -> Long.compare(b.getCreatedAt(), a.getCreatedAt()));
         }
 
-        // Paginate
         int total = punishments.size();
         int start = (page - 1) * limit;
         int end = Math.min(start + limit, total);
@@ -160,7 +157,7 @@ public class PunishmentService {
             );
 
             if (punishment != null) {
-                // WebSocket غیرفعال است، فقط لاگ می‌زنیم
+
                 if (plugin.getWebServer() != null && plugin.getWebServer().isRunning()) {
                     plugin.getSXBansLogger().info("Punishment created via WebPanel: " + punishment.getId());
                 }

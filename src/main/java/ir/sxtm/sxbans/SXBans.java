@@ -26,7 +26,6 @@ import java.util.concurrent.Executors;
 public class SXBans extends JavaPlugin {
     private static SXBans instance;
 
-    // Managers
     private ConfigManager configManager;
     private MessagesManager messagesManager;
     private WebUsersManager webUsersManager;
@@ -39,14 +38,12 @@ public class SXBans extends JavaPlugin {
     private WebServer webServer;
     private SXBansAPI api;
 
-    // Utilities
     private SXBansLogger logger;
     private CacheManager cacheManager;
     private RateLimiter rateLimiter;
     private ThreadPoolManager threadPoolManager;
     private ExportImportManager exportImportManager;
 
-    // Punishment features
     private BanAppealManager banAppealManager;
     private BanWaveManager banWaveManager;
     private AutoBanManager autoBanManager;
@@ -64,65 +61,52 @@ public class SXBans extends JavaPlugin {
         instance = this;
 
         try {
-            // 1. Initialize thread pool
+
             executorService = Executors.newCachedThreadPool();
 
-            // 2. Initialize configuration
             configManager = new ConfigManager(this);
             configManager.loadConfig();
 
-            // 3. Initialize logger
             logger = new SXBansLogger(this);
             logger.info("Starting SXBans v" + getDescription().getVersion() + "...");
 
-            // 4. Extract web files to plugin folder
             extractWebFiles();
 
-            // 5. Initialize thread pool manager
             threadPoolManager = new ThreadPoolManager(this);
             logger.debug("Thread pool manager initialized");
 
-            // 6. Initialize messages
             messagesManager = new MessagesManager(this);
             messagesManager.loadMessages();
             logger.debug("Messages loaded");
 
-            // 7. Initialize web users
             webUsersManager = new WebUsersManager(this);
             webUsersManager.loadUsers();
             logger.debug("Web users loaded");
 
-            // 8. Initialize cache
             cacheManager = new CacheManager(this);
             logger.debug("Cache manager initialized");
 
-            // 9. Initialize rate limiter
             rateLimiter = new RateLimiter(this);
             logger.debug("Rate limiter initialized");
 
-            // 10. Initialize database
             databaseManager = new DatabaseManager(this);
             databaseManager.initialize();
             logger.debug("Database initialized");
 
-            // 11. Initialize Redis
             if (configManager.isRedisEnabled()) {
                 redisManager = new RedisManager(this);
                 redisManager.initialize();
                 logger.debug("Redis initialized");
             }
 
-            // 12. Initialize storage
             punishmentStorage = new PunishmentStorage(this);
             punishmentStorage.initialize();
             logger.debug("Punishment storage initialized");
 
-            // 13. Initialize punishment manager
             punishmentManager = new PunishmentManager(this);
             punishmentManager.initialize();
             logger.debug("Punishment manager initialized");
 
-            // 14. Initialize ban features
             banAppealManager = new BanAppealManager(this);
             banWaveManager = new BanWaveManager(this);
             autoBanManager = new AutoBanManager(this);
@@ -132,40 +116,32 @@ public class SXBans extends JavaPlugin {
             scheduledPunishmentManager = new ScheduledPunishmentManager(this);
             logger.debug("Punishment features initialized");
 
-            // 15. Initialize proxy
             proxyManager = new ProxyManager(this);
             proxyManager.initialize();
             logger.debug("Proxy manager initialized");
 
-            // 16. Initialize hooks
             hookManager = new HookManager(this);
             hookManager.initialize();
             logger.debug("Hook manager initialized");
 
-            // 17. Initialize export/import
             exportImportManager = new ExportImportManager(this);
             logger.debug("Export/Import manager initialized");
 
-            // 18. Register commands
             registerCommands();
             logger.debug("Commands registered");
 
-            // 19. Register listeners
             registerListeners();
             logger.debug("Listeners registered");
 
-            // 20. Initialize web server
             if (configManager.isWebEnabled()) {
                 webServer = new WebServer(this);
                 webServer.start();
                 logger.debug("Web server started on port " + configManager.getWebPort());
             }
 
-            // 21. Initialize API
             api = new SXBansAPI(this);
             logger.debug("API initialized");
 
-            // 22. Register shutdown hook
             registerShutdownHook();
 
             pluginEnabled = true;
@@ -183,9 +159,6 @@ public class SXBans extends JavaPlugin {
         }
     }
 
-    /**
-     * Extract web files (HTML, CSS, JS) from JAR to plugin folder.
-     */
     private void extractWebFiles() {
         try {
             File webDir = new File(getDataFolder(), "web");
@@ -193,20 +166,17 @@ public class SXBans extends JavaPlugin {
                 webDir.mkdirs();
             }
 
-            // Extract HTML files
             String[] htmlFiles = {"login.html", "dashboard.html", "players.html",
                     "history.html", "console.html", "settings.html", "player-card.html"};
             for (String file : htmlFiles) {
                 extractFile("/web/html/" + file, new File(webDir, "html/" + file));
             }
 
-            // Extract CSS files
             String[] cssFiles = {"style.css", "glassmorphism.css", "neumorphism.css"};
             for (String file : cssFiles) {
                 extractFile("/web/css/" + file, new File(webDir, "css/" + file));
             }
 
-            // Extract JS files
             String[] jsFiles = {"main.js", "dashboard.js", "players.js", "console.js", "animations.js"};
             for (String file : jsFiles) {
                 extractFile("/web/js/" + file, new File(webDir, "js/" + file));
@@ -218,12 +188,9 @@ public class SXBans extends JavaPlugin {
         }
     }
 
-    /**
-     * Extract a single file from JAR to external folder.
-     */
     private void extractFile(String resourcePath, File targetFile) {
         try {
-            // اگر فایل از قبل وجود دارد، آن را دوباره استخراج نکن
+
             if (targetFile.exists()) {
                 return;
             }
@@ -260,42 +227,36 @@ public class SXBans extends JavaPlugin {
         }
 
         try {
-            // Shutdown web server
+
             if (webServer != null) {
                 webServer.stop();
                 if (logger != null) logger.debug("Web server stopped");
             }
 
-            // Shutdown scheduled tasks
             if (scheduledPunishmentManager != null) {
                 scheduledPunishmentManager.shutdown();
             }
 
-            // Save all data
             if (punishmentManager != null) {
                 punishmentManager.saveAll();
                 if (logger != null) logger.debug("Punishments saved");
             }
 
-            // Close database connections
             if (databaseManager != null) {
                 databaseManager.close();
                 if (logger != null) logger.debug("Database connections closed");
             }
 
-            // Close Redis
             if (redisManager != null) {
                 redisManager.close();
                 if (logger != null) logger.debug("Redis connection closed");
             }
 
-            // Shutdown thread pool
             if (threadPoolManager != null) {
                 threadPoolManager.shutdown();
                 if (logger != null) logger.debug("Thread pool shut down");
             }
 
-            // Clear caches
             if (cacheManager != null) {
                 cacheManager.clearAll();
                 if (logger != null) logger.debug("Caches cleared");
@@ -319,33 +280,27 @@ public class SXBans extends JavaPlugin {
     }
 
     private void registerCommands() {
-        // Ban commands
+
         getCommand("ban").setExecutor(new BanCommand(this));
         getCommand("tempban").setExecutor(new TempBanCommand(this));
         getCommand("unban").setExecutor(new UnbanCommand(this));
 
-        // Kick commands
         getCommand("kick").setExecutor(new KickCommand(this));
 
-        // Mute commands
         getCommand("mute").setExecutor(new MuteCommand(this));
         getCommand("tempmute").setExecutor(new TempMuteCommand(this));
         getCommand("unmute").setExecutor(new UnmuteCommand(this));
 
-        // Warn command
         getCommand("warn").setExecutor(new WarnCommand(this));
 
-        // Info commands
         getCommand("history").setExecutor(new HistoryCommand(this));
         getCommand("check").setExecutor(new CheckCommand(this));
 
-        // IP commands
         getCommand("ipban").setExecutor(new IpBanCommand(this));
         getCommand("ipunban").setExecutor(new IpUnbanCommand(this));
         getCommand("ipmute").setExecutor(new IpMuteCommand(this));
         getCommand("ipunmute").setExecutor(new IpUnmuteCommand(this));
 
-        // Admin command
         getCommand("sxbans").setExecutor(new SxBansCommand(this));
     }
 
@@ -362,8 +317,6 @@ public class SXBans extends JavaPlugin {
             }
         }));
     }
-
-    // ========== Getters ==========
 
     public static SXBans getInstance() {
         return instance;

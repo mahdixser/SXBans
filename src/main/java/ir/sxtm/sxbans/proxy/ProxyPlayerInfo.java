@@ -2,9 +2,6 @@ package ir.sxtm.sxbans.proxy;
 
 import java.util.UUID;
 
-/**
- * Information about a player on the network.
- */
 public class ProxyPlayerInfo {
     private String name;
     private UUID uuid;

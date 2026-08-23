@@ -54,7 +54,6 @@ public class PunishmentManager {
         if (initialized) return;
         loadAllPunishments();
         startExpiryChecker();
-        startAutoUnbanChecker();
         startWarningExpiryChecker();
         initialized = true;
         plugin.getSXBansLogger().info("Punishment manager initialized");
@@ -85,6 +84,9 @@ public class PunishmentManager {
                 case IP_BAN:
                     if (punishment.getIpAddress() != null) {
                         activeIpBansCache.put(punishment.getIpAddress(), punishment);
+
+                        plugin.getServer().banIP(punishment.getIpAddress());
+                        plugin.getSXBansLogger().info("IP " + punishment.getIpAddress() + " added to server ban list");
                     }
                     break;
                 case IP_MUTE:
@@ -105,11 +107,34 @@ public class PunishmentManager {
 
     public Punishment applyPunishment(UUID playerUUID, String playerName, PunishmentType type,
                                       String reason, long duration, UUID executorUUID, String executorName) {
+        return applyPunishment(playerUUID, playerName, type, reason, duration, executorUUID, executorName, null);
+    }
+
+    public Punishment applyPunishment(UUID playerUUID, String playerName, PunishmentType type,
+                                      String reason, long duration, UUID executorUUID, String executorName,
+                                      String explicitIp) {
+        return applyPunishmentInternal(playerUUID, playerName, type, reason, duration, executorUUID, executorName, explicitIp, false);
+    }
+
+    public Punishment applyPunishmentFromNetwork(UUID playerUUID, String playerName, PunishmentType type,
+                                                 String reason, long duration, UUID executorUUID, String executorName,
+                                                 String explicitIp) {
+        return applyPunishmentInternal(playerUUID, playerName, type, reason, duration, executorUUID, executorName, explicitIp, true);
+    }
+
+    private Punishment applyPunishmentInternal(UUID playerUUID, String playerName, PunishmentType type,
+                                      String reason, long duration, UUID executorUUID, String executorName,
+                                      String explicitIp, boolean fromNetwork) {
         if (playerUUID == null || executorUUID == null) {
             throw new IllegalArgumentException("Player and executor UUIDs cannot be null");
         }
 
         if (isPunished(playerUUID, type)) {
+            return null;
+        }
+
+        if ((type == PunishmentType.IP_BAN && isIpBanned(explicitIp)) ||
+                (type == PunishmentType.IP_MUTE && isIpMuted(explicitIp))) {
             return null;
         }
 
@@ -125,38 +150,30 @@ public class PunishmentManager {
         );
 
         Player player = Bukkit.getPlayer(playerUUID);
+        String ip = explicitIp;
+        if (ip == null && player != null) {
+            ip = player.getAddress().getAddress().getHostAddress();
+        }
+        if (ip != null && !ip.isEmpty()) {
+            punishment.setIpAddress(ip);
+        }
         if (player != null) {
-            punishment.setIpAddress(player.getAddress().getAddress().getHostAddress());
             punishment.setWorldName(player.getWorld().getName());
         }
 
-        String serverName = "Unknown";
-        try {
-            serverName = Bukkit.getServer().getName();
-        } catch (Exception e) {
-            try {
-                serverName = Bukkit.getServer().getIp();
-                if (serverName == null || serverName.isEmpty()) {
-                    serverName = "Unknown";
-                }
-            } catch (Exception ex) {
-                serverName = "Unknown";
-            }
-        }
-        punishment.setServerName(serverName);
+        punishment.setServerName(plugin.getConfigManager().getServerName());
 
         storage.savePunishment(punishment);
         addToCache(punishment);
         addHistory(playerUUID, playerName, "PUNISHMENT",
                 type.name() + ": " + reason + " by " + executorName, executorUUID, executorName);
 
-        // ===== FIX: اجرای اثرات مجازات در Thread اصلی =====
         applyPunishmentEffectsSync(punishment);
 
         broadcastPunishment(punishment);
 
-        if (redisManager != null && redisManager.isEnabled()) {
-            redisManager.publishPunishment(punishment);
+        if (!fromNetwork && plugin.getConfigManager().isNetworkSyncEnabled()) {
+            plugin.getProxyManager().broadcastPunishment(punishment);
         }
 
         if (type == PunishmentType.WARN) {
@@ -166,12 +183,9 @@ public class PunishmentManager {
         return punishment;
     }
 
-    // ===== FIX: متد جدید برای اجرای اثرات مجازات در Thread اصلی =====
     private void applyPunishmentEffectsSync(Punishment punishment) {
         Player player = Bukkit.getPlayer(punishment.getPlayerUUID());
-        if (player == null) return;
 
-        // اجرا در Thread اصلی سرور
         if (Bukkit.isPrimaryThread()) {
             applyPunishmentEffects(punishment);
         } else {
@@ -181,26 +195,112 @@ public class PunishmentManager {
 
     private void applyPunishmentEffects(Punishment punishment) {
         Player player = Bukkit.getPlayer(punishment.getPlayerUUID());
-        if (player == null) return;
+        String message = getPunishmentMessage(punishment);
+        if (message == null || message.isEmpty()) {
+            message = "&cYou have been " + punishment.getType().getDisplayName() + "!";
+        }
 
         switch (punishment.getType()) {
             case BAN:
             case TEMP_BAN:
-            case IP_BAN:
-                player.kickPlayer(plugin.getMessagesManager().getBanMessage(punishment));
+                if (player != null) {
+                    player.kickPlayer(plugin.getMessagesManager().colorize(message));
+                }
                 break;
+
+            case IP_BAN:
+
+                String ip = punishment.getIpAddress();
+                if (ip != null && !ip.isEmpty()) {
+
+                    plugin.getServer().banIP(ip);
+                    plugin.getSXBansLogger().info("IP " + ip + " has been banned by " + punishment.getExecutorName());
+                }
+
+                if (player != null) {
+                    player.kickPlayer(plugin.getMessagesManager().colorize(message));
+                }
+
+                if (ip != null && !ip.isEmpty()) {
+                    for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+                        if (onlinePlayer.getAddress() != null &&
+                                onlinePlayer.getAddress().getAddress().getHostAddress().equals(ip) &&
+                                !onlinePlayer.equals(player)) {
+                            onlinePlayer.kickPlayer(plugin.getMessagesManager().colorize(
+                                    "&cYour IP address has been banned!"
+                            ));
+                        }
+                    }
+                }
+                break;
+
             case KICK:
             case IP_KICK:
-                player.kickPlayer(plugin.getMessagesManager().getKickMessage(punishment));
+                if (player != null) {
+                    player.kickPlayer(plugin.getMessagesManager().colorize(message));
+                }
                 break;
+
             case MUTE:
             case TEMP_MUTE:
+                if (player != null) {
+                    player.sendMessage(plugin.getMessagesManager().colorize(message));
+                }
+                break;
+
             case IP_MUTE:
-                player.sendMessage(plugin.getMessagesManager().getMuteMessage(punishment));
+
+                if (player != null) {
+                    player.sendMessage(plugin.getMessagesManager().colorize(message));
+                }
+
+                String muteIp = punishment.getIpAddress();
+                if (muteIp != null && !muteIp.isEmpty()) {
+                    for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+                        if (onlinePlayer.getAddress() != null &&
+                                onlinePlayer.getAddress().getAddress().getHostAddress().equals(muteIp) &&
+                                !onlinePlayer.equals(player)) {
+                            onlinePlayer.sendMessage(plugin.getMessagesManager().colorize(
+                                    "&cYour IP address has been muted!"
+                            ));
+                        }
+                    }
+                }
                 break;
+
             case WARN:
-                player.sendMessage(plugin.getMessagesManager().getWarnMessage(punishment));
+                if (player != null) {
+                    player.sendMessage(plugin.getMessagesManager().colorize(message));
+                }
                 break;
+        }
+    }
+
+    public String getPunishmentMessage(Punishment punishment) {
+        if (punishment == null) return null;
+
+        switch (punishment.getType()) {
+            case BAN:
+                return plugin.getMessagesManager().getBanMessage(punishment);
+            case TEMP_BAN:
+                return plugin.getMessagesManager().getTempBanMessage(punishment);
+            case MUTE:
+                return plugin.getMessagesManager().getMuteMessage(punishment);
+            case TEMP_MUTE:
+                return plugin.getMessagesManager().getTempMuteMessage(punishment);
+            case KICK:
+                return plugin.getMessagesManager().getKickMessage(punishment);
+            case IP_KICK:
+                return plugin.getMessagesManager().getIpKickMessage(punishment);
+            case IP_BAN:
+                return plugin.getMessagesManager().getIpBanMessage(punishment);
+            case IP_MUTE:
+                return plugin.getMessagesManager().getIpMuteMessage(punishment);
+            case WARN:
+                return plugin.getMessagesManager().getWarnMessage(punishment);
+            default:
+                return plugin.getMessagesManager().getColoredMessage("punishment." +
+                        punishment.getType().name().toLowerCase().replace("_", "") + ".message", null);
         }
     }
 
@@ -218,6 +318,14 @@ public class PunishmentManager {
     }
 
     public boolean removePunishment(UUID punishmentId, UUID removerUUID, String removerName, String reason) {
+        return removePunishmentInternal(punishmentId, removerUUID, removerName, reason, false);
+    }
+
+    public boolean removePunishmentFromNetwork(UUID punishmentId, UUID removerUUID, String removerName, String reason) {
+        return removePunishmentInternal(punishmentId, removerUUID, removerName, reason, true);
+    }
+
+    private boolean removePunishmentInternal(UUID punishmentId, UUID removerUUID, String removerName, String reason, boolean fromNetwork) {
         Punishment punishment = storage.getPunishment(punishmentId);
         if (punishment == null) {
             return false;
@@ -225,6 +333,15 @@ public class PunishmentManager {
 
         if (punishment.getStatus() != PunishmentStatus.ACTIVE) {
             return false;
+        }
+
+        if (punishment.getType() == PunishmentType.IP_BAN) {
+            String ip = punishment.getIpAddress();
+            if (ip != null && !ip.isEmpty()) {
+
+                plugin.getServer().unbanIP(ip);
+                plugin.getSXBansLogger().info("IP " + ip + " has been unbanned by " + removerName);
+            }
         }
 
         punishment.setStatus(PunishmentStatus.REMOVED);
@@ -242,11 +359,41 @@ public class PunishmentManager {
         }
 
         removeFromCache(punishment);
+
+        if (punishment.getType() == PunishmentType.BAN || punishment.getType() == PunishmentType.TEMP_BAN ||
+                punishment.getType() == PunishmentType.MUTE || punishment.getType() == PunishmentType.TEMP_MUTE) {
+            List<Punishment> playerPunishments = playerPunishmentsCache.getOrDefault(punishment.getPlayerUUID(), Collections.emptyList());
+            for (Punishment other : new ArrayList<>(playerPunishments)) {
+                if (other.getId().equals(punishment.getId())) continue;
+                if (other.getStatus() != PunishmentStatus.ACTIVE) continue;
+                boolean sameCategory = (punishment.getType() == PunishmentType.BAN || punishment.getType() == PunishmentType.TEMP_BAN)
+                        ? (other.getType() == PunishmentType.BAN || other.getType() == PunishmentType.TEMP_BAN)
+                        : (other.getType() == PunishmentType.MUTE || other.getType() == PunishmentType.TEMP_MUTE);
+                if (!sameCategory) continue;
+
+                plugin.getSXBansLogger().warning("Found an extra ACTIVE " + other.getType() +
+                        " record (" + other.getId() + ") for " + punishment.getPlayerName() +
+                        " while removing " + punishment.getId() + " — cleaning it up too.");
+                other.setStatus(PunishmentStatus.REMOVED);
+                other.setRemoverUUID(removerUUID);
+                other.setRemoverName(removerName);
+                other.setRemovedTime(Instant.now().toEpochMilli());
+                other.setRemoveReason(reason);
+                other.setUpdatedAt(Instant.now().toEpochMilli());
+                storage.updatePunishment(other);
+                removeFromCache(other);
+            }
+        }
+
         addHistory(punishment.getPlayerUUID(), punishment.getPlayerName(), "REMOVE_PUNISHMENT",
                 punishment.getType().name() + " removed by " + removerName + ": " + reason,
                 removerUUID, removerName);
 
         broadcastRemoval(punishment);
+
+        if (!fromNetwork && plugin.getConfigManager().isNetworkSyncEnabled()) {
+            plugin.getProxyManager().broadcastPunishmentRemoval(punishment);
+        }
 
         return true;
     }
@@ -283,7 +430,8 @@ public class PunishmentManager {
     }
 
     private void broadcastPunishment(Punishment punishment) {
-        String basePath = "broadcast." + punishment.getType().name().toLowerCase();
+
+        String basePath = "broadcast." + punishment.getType().name().toLowerCase().replace("_", "");
         Map<String, String> placeholders = messageUtils.formatPunishmentPlaceholders(punishment);
         messageUtils.sendBroadcastWithPermission(basePath, placeholders, punishment);
     }
@@ -332,10 +480,12 @@ public class PunishmentManager {
 
         if (warnings >= maxWarnings && plugin.getConfigManager().isAutoBanEnabled()) {
             long duration = plugin.getConfigManager().getAutoBanDuration();
+
+            PunishmentType autoBanType = duration > 0 ? PunishmentType.TEMP_BAN : PunishmentType.BAN;
             applyPunishment(
                     punishment.getPlayerUUID(),
                     punishment.getPlayerName(),
-                    PunishmentType.TEMP_BAN,
+                    autoBanType,
                     "Auto-banned for reaching " + warnings + " warnings",
                     duration,
                     UUID.fromString("00000000-0000-0000-0000-000000000000"),
@@ -344,7 +494,6 @@ public class PunishmentManager {
         }
     }
 
-    // ===== Query Methods =====
     public boolean isPlayerBanned(UUID playerUUID) {
         Punishment ban = activeBansCache.get(playerUUID);
         return ban != null && ban.isActive();
@@ -356,8 +505,19 @@ public class PunishmentManager {
     }
 
     public boolean isIpBanned(String ip) {
+
+        if (ip == null || ip.isEmpty()) return false;
+
         Punishment ban = activeIpBansCache.get(ip);
-        return ban != null && ban.isActive();
+        if (ban != null && ban.isActive()) {
+            return true;
+        }
+
+        if (plugin.getServer().getBanList(org.bukkit.BanList.Type.IP).isBanned(ip)) {
+            return true;
+        }
+
+        return false;
     }
 
     public boolean isIpMuted(String ip) {
@@ -399,57 +559,33 @@ public class PunishmentManager {
         warningCountsCache.remove(playerUUID.toString());
     }
 
-    // ===== Background Tasks =====
     private void startExpiryChecker() {
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             long now = Instant.now().toEpochMilli();
             for (Punishment p : getAllActivePunishments()) {
                 if (!p.isPermanent() && p.getEndTime() <= now) {
-                    p.setStatus(PunishmentStatus.EXPIRED);
-                    p.setUpdatedAt(now);
-                    storage.updatePunishment(p);
-                    removeFromCache(p);
-
-                    Player player = Bukkit.getPlayer(p.getPlayerUUID());
-                    if (player != null) {
-                        player.sendMessage(plugin.getMessagesManager().getColoredMessage("punishment.expired",
-                                Map.of("type", p.getType().getDisplayName())));
-                    }
-                }
-            }
-        }, 0, 20 * 60);
-    }
-
-    private void startAutoUnbanChecker() {
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
-            long now = Instant.now().toEpochMilli();
-
-            for (Punishment p : new ArrayList<>(activeBansCache.values())) {
-                if (!p.isPermanent() && p.getEndTime() <= now) {
-                    p.setStatus(PunishmentStatus.EXPIRED);
-                    storage.updatePunishment(p);
-                    activeBansCache.remove(p.getPlayerUUID());
-
-                    Player player = Bukkit.getPlayer(p.getPlayerUUID());
-                    if (player != null) {
-                        player.sendMessage(plugin.getMessagesManager().getColoredMessage("punishment.auto-unban"));
-                    }
-                }
-            }
-
-            for (Punishment p : new ArrayList<>(activeMutesCache.values())) {
-                if (!p.isPermanent() && p.getEndTime() <= now) {
-                    p.setStatus(PunishmentStatus.EXPIRED);
-                    storage.updatePunishment(p);
-                    activeMutesCache.remove(p.getPlayerUUID());
-
-                    Player player = Bukkit.getPlayer(p.getPlayerUUID());
-                    if (player != null) {
-                        player.sendMessage(plugin.getMessagesManager().getColoredMessage("punishment.auto-unmute"));
-                    }
+                    expirePunishment(p, now);
                 }
             }
         }, 0, 20 * 5);
+    }
+
+    private void expirePunishment(Punishment p, long now) {
+        p.setStatus(PunishmentStatus.EXPIRED);
+        p.setUpdatedAt(now);
+        storage.updatePunishment(p);
+        removeFromCache(p);
+
+        if (p.getType() == PunishmentType.IP_BAN && p.getIpAddress() != null) {
+            plugin.getServer().unbanIP(p.getIpAddress());
+            plugin.getSXBansLogger().info("Expired IP ban removed from server ban list: " + p.getIpAddress());
+        }
+
+        Player player = Bukkit.getPlayer(p.getPlayerUUID());
+        if (player != null) {
+            String message = plugin.getMessagesManager().getExpiredMessage(p.getType().getDisplayName());
+            player.sendMessage(plugin.getMessagesManager().colorize(message));
+        }
     }
 
     private void startWarningExpiryChecker() {
@@ -485,6 +621,45 @@ public class PunishmentManager {
 
     public void saveAll() {
         storage.saveAll();
+    }
+
+    public int clearPlayerData(UUID playerUUID) {
+        List<Punishment> punishments = new ArrayList<>(getPlayerPunishments(playerUUID));
+        for (Punishment p : punishments) {
+            if (p.getStatus() == PunishmentStatus.ACTIVE) {
+                if (p.getType() == PunishmentType.IP_BAN && p.getIpAddress() != null) {
+                    plugin.getServer().unbanIP(p.getIpAddress());
+                }
+                removeFromCache(p);
+            }
+            storage.deletePunishment(p.getId());
+        }
+        playerPunishmentsCache.remove(playerUUID);
+        warningCountsCache.remove(playerUUID.toString());
+        return punishments.size();
+    }
+
+    public int clearAllData() {
+        List<Punishment> all = storage.getAllPunishments();
+
+        for (Punishment p : activeIpBansCache.values()) {
+            if (p.getIpAddress() != null) {
+                plugin.getServer().unbanIP(p.getIpAddress());
+            }
+        }
+
+        for (Punishment p : all) {
+            storage.deletePunishment(p.getId());
+        }
+
+        playerPunishmentsCache.clear();
+        activeBansCache.clear();
+        activeMutesCache.clear();
+        activeIpBansCache.clear();
+        activeIpMutesCache.clear();
+        warningCountsCache.clear();
+
+        return all.size();
     }
 
     public void addPunishmentToCache(Punishment punishment) {

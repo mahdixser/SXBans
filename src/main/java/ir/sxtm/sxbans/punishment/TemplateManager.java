@@ -29,13 +29,31 @@ public class TemplateManager {
             plugin.saveResource("templates.yml", false);
         }
 
-        config = YamlConfiguration.loadConfiguration(templatesFile);
-        loadDefaults();
+        loadFromResourceDefaults();
         loadTemplatesFromConfig();
     }
 
+    private void loadFromResourceDefaults() {
+
+        config = YamlConfiguration.loadConfiguration(templatesFile);
+
+        try (java.io.InputStream defaultStream = plugin.getResource("templates.yml")) {
+            if (defaultStream != null) {
+                YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(
+                        new java.io.InputStreamReader(defaultStream, java.nio.charset.StandardCharsets.UTF_8));
+                config.setDefaults(defaultConfig);
+            }
+        } catch (Exception e) {
+            plugin.getLogger().severe("Failed to load templates.yml defaults: " + e.getMessage());
+        }
+
+        loadDefaults();
+        config.options().copyDefaults(true);
+        saveTemplates();
+    }
+
     private void loadDefaults() {
-        // Default templates
+
         config.addDefault("templates.hacking.name", "Hacking");
         config.addDefault("templates.hacking.type", "TEMP_BAN");
         config.addDefault("templates.hacking.duration", "7d");
@@ -136,15 +154,17 @@ public class TemplateManager {
     }
 
     public void saveTemplates() {
-        try {
-            config.save(templatesFile);
+
+        try (java.io.Writer writer = new java.io.OutputStreamWriter(
+                new java.io.FileOutputStream(templatesFile), java.nio.charset.StandardCharsets.UTF_8)) {
+            writer.write(config.saveToString());
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to save templates: " + e.getMessage());
         }
     }
 
     public void reloadTemplates() {
-        config = YamlConfiguration.loadConfiguration(templatesFile);
+        loadFromResourceDefaults();
         loadTemplatesFromConfig();
     }
 

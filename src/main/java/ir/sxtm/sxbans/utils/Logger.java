@@ -8,10 +8,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-/**
- * Advanced logging system for SX Bans.
- * Supports console, file, database, and web logging.
- */
 public class Logger {
     private final SXBans plugin;
     private final java.util.logging.Logger bukkitLogger;
@@ -32,21 +28,15 @@ public class Logger {
         this.logFile = new File(plugin.getDataFolder(), "logs" + File.separator + "sxbans.log");
         this.running = true;
 
-        // Load settings
         this.consoleLogging = plugin.getConfigManager().isConsoleLogging();
         this.fileLogging = plugin.getConfigManager().isFileLogging();
         this.webLogging = plugin.getConfigManager().isWebLogging();
 
-        // Create logs directory
         logFile.getParentFile().mkdirs();
 
-        // Start log processor thread
         startLogProcessor();
     }
 
-    /**
-     * Start the log processor thread.
-     */
     private void startLogProcessor() {
         logThread = new Thread(() -> {
             while (running) {
@@ -69,29 +59,21 @@ public class Logger {
         logThread.start();
     }
 
-    /**
-     * Process a single log entry.
-     */
     private void processLog(String log) {
-        // Console logging
+
         if (consoleLogging) {
             bukkitLogger.info(log);
         }
 
-        // File logging
         if (fileLogging) {
             writeToFile(log);
         }
 
-        // Web logging
         if (webLogging) {
             sendToWeb(log);
         }
     }
 
-    /**
-     * Write log to file.
-     */
     private void writeToFile(String log) {
         try (FileWriter fw = new FileWriter(logFile, true);
              BufferedWriter bw = new BufferedWriter(fw);
@@ -102,51 +84,28 @@ public class Logger {
         }
     }
 
-    /**
-     * Send log to web panel.
-     */
     private void sendToWeb(String log) {
-        // Send via WebSocket if available
+
         if (plugin.getWebServer() != null) {
-            // This would be sent to WebSocket clients
+
         }
     }
 
-    /**
-     * Log an info message.
-     *
-     * @param message The message
-     */
     public void info(String message) {
         String log = formatLog("INFO", message);
         logQueue.offer(log);
     }
 
-    /**
-     * Log a warning message.
-     *
-     * @param message The message
-     */
     public void warning(String message) {
         String log = formatLog("WARN", message);
         logQueue.offer(log);
     }
 
-    /**
-     * Log a severe message.
-     *
-     * @param message The message
-     */
     public void severe(String message) {
         String log = formatLog("ERROR", message);
         logQueue.offer(log);
     }
 
-    /**
-     * Log a debug message.
-     *
-     * @param message The message
-     */
     public void debug(String message) {
         if (plugin.getConfigManager().getBoolean("debug", false)) {
             String log = formatLog("DEBUG", message);
@@ -154,12 +113,6 @@ public class Logger {
         }
     }
 
-    /**
-     * Log an exception.
-     *
-     * @param message The message
-     * @param e The exception
-     */
     public void error(String message, Throwable e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -168,51 +121,25 @@ public class Logger {
         logQueue.offer(log);
     }
 
-    /**
-     * Log a punishment event.
-     *
-     * @param type The event type
-     * @param details The event details
-     */
     public void logPunishment(String type, String details) {
         String log = formatLog("PUNISHMENT", type + " - " + details);
         logQueue.offer(log);
     }
 
-    /**
-     * Log a web event.
-     *
-     * @param type The event type
-     * @param details The event details
-     */
     public void logWeb(String type, String details) {
         String log = formatLog("WEB", type + " - " + details);
         logQueue.offer(log);
     }
 
-    /**
-     * Format a log message.
-     */
     private String formatLog(String level, String message) {
         String timestamp = dateFormat.format(new Date());
         return String.format("[%s] [SXBans/%s] %s", timestamp, level, message);
     }
 
-    /**
-     * Get the log file.
-     *
-     * @return The log file
-     */
     public File getLogFile() {
         return logFile;
     }
 
-    /**
-     * Read recent logs from file.
-     *
-     * @param lines Number of lines to read
-     * @return List of log lines
-     */
     public java.util.List<String> getRecentLogs(int lines) {
         java.util.List<String> recent = new java.util.ArrayList<>();
 
@@ -222,7 +149,6 @@ public class Logger {
             long fileLength = raf.length();
             if (fileLength == 0) return recent;
 
-            // Start from the end
             long pos = fileLength - 1;
             int linesRead = 0;
             StringBuilder line = new StringBuilder();
@@ -254,9 +180,6 @@ public class Logger {
         return recent;
     }
 
-    /**
-     * Clear the log file.
-     */
     public void clearLogs() {
         try {
             new FileWriter(logFile, false).close();
@@ -266,9 +189,6 @@ public class Logger {
         }
     }
 
-    /**
-     * Shutdown the logger.
-     */
     public void shutdown() {
         running = false;
         if (logThread != null) {
@@ -278,7 +198,6 @@ public class Logger {
             } catch (InterruptedException ignored) {}
         }
 
-        // Process remaining logs
         String log;
         while ((log = logQueue.poll()) != null) {
             if (consoleLogging) {

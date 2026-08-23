@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* ===== ALL STYLES (همان استایل‌های dashboard) ===== */
+
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Inter', -apple-system, sans-serif;
@@ -38,7 +38,6 @@
 
         .app-container { display:flex; min-height:100vh; }
 
-        /* Sidebar */
         .sidebar {
             width:220px;
             background:rgba(10,10,26,0.9);
@@ -155,21 +154,6 @@
             gap:6px;
         }
         .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(108,92,231,0.3); }
-        .btn-secondary {
-            background:rgba(255,255,255,0.05);
-            color:#fff;
-            border:1px solid rgba(255,255,255,0.1);
-            padding:8px 20px;
-            border-radius:12px;
-            font-size:14px;
-            font-weight:500;
-            cursor:pointer;
-            transition:0.3s;
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-        }
-        .btn-secondary:hover { background:rgba(255,255,255,0.1); }
 
         .history-section { padding:24px; }
         .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
@@ -256,6 +240,8 @@
         .loading-spinner i { font-size:28px; color:#6c5ce7; }
         .loading-spinner span { color:#8899aa; font-size:13px; }
 
+        .empty-state { padding:40px 20px; text-align:center; color:#8899aa; }
+
         @media (max-width:768px) {
             .sidebar { width:60px; }
             .sidebar .logo-small span,
@@ -291,9 +277,9 @@
         </ul>
         <div class="sidebar-footer">
             <div class="user-info">
-                <img src="https://crafatar.com/avatars/{{uuid}}?size=32" alt="User" class="user-avatar">
+                <img src="https://minotar.net/avatar/{{playerUuid}}/32" alt="User" class="user-avatar" id="sidebarAvatar">
                 <div>
-                    <span class="user-name">{{username}}</span>
+                    <span class="user-name" id="sidebarUsername">{{username}}</span>
                     <span class="user-level">Level {{user_level}}</span>
                 </div>
             </div>
@@ -335,7 +321,7 @@
         </header>
 
         <section class="history-section glass-card">
-            <!-- Bans -->
+
             <div style="margin-bottom:24px;">
                 <h3 style="color:#e74c3c;margin-bottom:10px;"><i class="fas fa-ban"></i> Bans</h3>
                 <div class="table-container">
@@ -346,7 +332,6 @@
                 </div>
             </div>
 
-            <!-- Mutes -->
             <div style="margin-bottom:24px;">
                 <h3 style="color:#f1c40f;margin-bottom:10px;"><i class="fas fa-volume-xmark"></i> Mutes</h3>
                 <div class="table-container">
@@ -357,7 +342,6 @@
                 </div>
             </div>
 
-            <!-- Warnings -->
             <div style="margin-bottom:24px;">
                 <h3 style="color:#3498db;margin-bottom:10px;"><i class="fas fa-triangle-exclamation"></i> Warnings</h3>
                 <div class="table-container">
@@ -368,7 +352,6 @@
                 </div>
             </div>
 
-            <!-- Kicks -->
             <div style="margin-bottom:24px;">
                 <h3 style="color:#9b59b6;margin-bottom:10px;"><i class="fas fa-door-open"></i> Kicks</h3>
                 <div class="table-container">
@@ -379,7 +362,6 @@
                 </div>
             </div>
 
-            <!-- IP Bans -->
             <div style="margin-bottom:24px;">
                 <h3 style="color:#e74c3c;margin-bottom:10px;"><i class="fas fa-ban"></i> IP Bans</h3>
                 <div class="table-container">
@@ -390,7 +372,6 @@
                 </div>
             </div>
 
-            <!-- IP Mutes -->
             <div>
                 <h3 style="color:#f1c40f;margin-bottom:10px;"><i class="fas fa-volume-xmark"></i> IP Mutes</h3>
                 <div class="table-container">
@@ -412,63 +393,121 @@
 
 <script>
     const token = localStorage.getItem('token');
-    if (!token) window.location.href = '/login';
+    const username = localStorage.getItem('username') || 'admin';
     let historyPage = 1, historyTotalPages = 1;
 
+    if (!token) window.location.href = '/login';
+
     function logout() { localStorage.clear(); window.location.href = '/login'; }
+
+    function updateSidebarAvatar() {
+        const avatar = document.getElementById('sidebarAvatar');
+        const nameEl = document.getElementById('sidebarUsername');
+        if (avatar) {
+
+            const defaultUuid = '00000000-0000-0000-0000-000000000000';
+            const playerUuid = localStorage.getItem('playerUuid') || defaultUuid;
+            avatar.src = `https://minotar.net/avatar/${playerUuid}/32`;
+        }
+        if (nameEl) {
+            nameEl.textContent = username || 'Admin';
+        }
+    }
+
+    function safeGet(obj, key, defaultValue) {
+        if (!obj) return defaultValue;
+        const val = obj[key];
+        return (val !== undefined && val !== null) ? val : defaultValue;
+    }
 
     function renderTable(tbodyId, items, hasDuration) {
         const tbody = document.getElementById(tbodyId);
         if (!items || items.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="${hasDuration ? 7 : 6}" class="text-center">No records found</td></tr>`;
+            const cols = hasDuration ? 7 : 6;
+            tbody.innerHTML = `<tr><td colspan="${cols}" class="text-center">No records found</td></tr>`;
             return;
         }
-        tbody.innerHTML = items.map(p => `
-            <tr>
-                <td>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <img src="https://crafatar.com/avatars/${p.executorUuid || '00000000-0000-0000-0000-000000000000'}?size=32" style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);">
-                        <span style="font-size:12px;">${p.executorName || 'Unknown'}</span>
-                    </div>
-                </td>
-                <td>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <img src="https://crafatar.com/avatars/${p.playerUuid || '00000000-0000-0000-0000-000000000000'}?size=32" style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);">
-                        <span style="font-size:12px;">${p.playerName || p.ip || 'Unknown'}</span>
-                    </div>
-                </td>
-                <td style="font-size:13px;">${p.reason || '-'}</td>
-                ${hasDuration ? `<td style="font-size:12px;color:#8899aa;">${p.duration > 0 ? p.duration + 'd' : 'Permanent'}</td>` : ''}
-                <td style="font-size:12px;color:#8899aa;">${p.createdAt ? new Date(p.createdAt).toLocaleDateString() : '-'}</td>
-                <td style="font-size:12px;color:#8899aa;">${p.server || 'Global'}</td>
-                <td><span class="status-badge status-${p.status}">${p.status || 'ACTIVE'}</span></td>
-            </tr>
-        `).join('');
+
+        tbody.innerHTML = items.map(p => {
+            const executorUuid = safeGet(p, 'executorUuid', '00000000-0000-0000-0000-000000000000');
+            const playerUuid = safeGet(p, 'playerUuid', '00000000-0000-0000-0000-000000000000');
+            const executorName = safeGet(p, 'executorName', 'Unknown');
+            const playerName = safeGet(p, 'playerName', safeGet(p, 'ip', 'Unknown'));
+            const reason = safeGet(p, 'reason', '-');
+            const duration = safeGet(p, 'duration', 0);
+            const createdAt = safeGet(p, 'createdAt', null);
+            const server = safeGet(p, 'server', 'Global');
+            const status = safeGet(p, 'status', 'ACTIVE');
+
+            const dateStr = createdAt ? new Date(createdAt).toLocaleDateString() : '-';
+            const durationStr = duration > 0 ? duration + 'd' : 'Permanent';
+
+            return `
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <img src="https://minotar.net/avatar/${executorUuid}/32" style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);">
+                            <span style="font-size:12px;">${executorName}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <img src="https://minotar.net/avatar/${playerUuid}/32" style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);">
+                            <span style="font-size:12px;">${playerName}</span>
+                        </div>
+                    </td>
+                    <td style="font-size:13px;">${reason}</td>
+                    ${hasDuration ? `<td style="font-size:12px;color:#8899aa;">${durationStr}</td>` : ''}
+                    <td style="font-size:12px;color:#8899aa;">${dateStr}</td>
+                    <td style="font-size:12px;color:#8899aa;">${server}</td>
+                    <td><span class="status-badge status-${status}">${status}</span></td>
+                </tr>
+            `;
+        }).join('');
     }
 
     async function loadHistory(page = 1) {
         const type = document.getElementById('typeFilter').value;
         const status = document.getElementById('statusFilter').value;
+
         try {
             const response = await fetch(`/api/punishments?page=${page}&limit=50&type=${type}&status=${status}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
-            if (data.success) {
+
+            if (data && data.success) {
                 const all = data.punishments || [];
+
                 renderTable('banTableBody', all.filter(p => p.type === 'BAN' || p.type === 'TEMP_BAN'), true);
                 renderTable('muteTableBody', all.filter(p => p.type === 'MUTE' || p.type === 'TEMP_MUTE'), true);
                 renderTable('warnTableBody', all.filter(p => p.type === 'WARN'), false);
                 renderTable('kickTableBody', all.filter(p => p.type === 'KICK' || p.type === 'IP_KICK'), false);
                 renderTable('ipBanTableBody', all.filter(p => p.type === 'IP_BAN'), false);
                 renderTable('ipMuteTableBody', all.filter(p => p.type === 'IP_MUTE'), false);
-                historyPage = data.page;
-                historyTotalPages = data.totalPages;
-                document.getElementById('historyPageInfo').textContent = `Page ${data.page} of ${data.totalPages}`;
+
+                historyPage = data.page || 1;
+                historyTotalPages = data.totalPages || 1;
+                document.getElementById('historyPageInfo').textContent = `Page ${historyPage} of ${historyTotalPages}`;
+
                 const btns = document.querySelectorAll('#historyPagination .page-btn');
-                if (btns.length >= 2) { btns[0].disabled = data.page <= 1; btns[1].disabled = data.page >= data.totalPages; }
+                if (btns.length >= 2) {
+                    btns[0].disabled = historyPage <= 1;
+                    btns[1].disabled = historyPage >= historyTotalPages;
+                }
+            } else {
+
+                ['banTableBody','muteTableBody','warnTableBody','kickTableBody','ipBanTableBody','ipMuteTableBody'].forEach(id => {
+                    document.getElementById(id).innerHTML = `<tr><td colspan="7" class="text-center">No records found</td></tr>`;
+                });
             }
-        } catch (error) { console.error('Error loading history:', error); }
+        } catch (error) {
+            console.error('Error loading history:', error);
+
+            ['banTableBody','muteTableBody','warnTableBody','kickTableBody','ipBanTableBody','ipMuteTableBody'].forEach(id => {
+                document.getElementById(id).innerHTML = `<tr><td colspan="7" class="text-center" style="color:#e74c3c;">Error loading data</td></tr>`;
+            });
+        }
     }
 
     function changeHistoryPage(direction) {
@@ -476,7 +515,10 @@
         else if (direction === 'next' && historyPage < historyTotalPages) loadHistory(historyPage + 1);
     }
 
-    document.addEventListener('DOMContentLoaded', () => loadHistory());
+    document.addEventListener('DOMContentLoaded', () => {
+        updateSidebarAvatar();
+        loadHistory();
+    });
 </script>
 </body>
 </html>

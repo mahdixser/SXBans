@@ -18,7 +18,17 @@ public class WebServer {
     private final SXBans plugin;
     private Server server;
     private boolean running;
-    private final ConcurrentHashMap<String, String> sessionCache;
+
+    private final ConcurrentHashMap<String, SessionEntry> sessionCache;
+
+    private static final class SessionEntry {
+        final String username;
+        final long expiresAt;
+        SessionEntry(String username, long expiresAt) {
+            this.username = username;
+            this.expiresAt = expiresAt;
+        }
+    }
 
     public WebServer(SXBans plugin) {
         this.plugin = plugin;
@@ -46,22 +56,17 @@ public class WebServer {
             context.setContextPath("/");
             server.setHandler(context);
 
-            // ===== WebSocket REMOVED =====
-
-            // ===== STATIC RESOURCES =====
             context.addServlet(new ServletHolder(new StaticResourceServlet(plugin)), "/css/*");
             context.addServlet(new ServletHolder(new StaticResourceServlet(plugin)), "/js/*");
             context.addServlet(new ServletHolder(new StaticResourceServlet(plugin)), "/fonts/*");
             context.addServlet(new ServletHolder(new StaticResourceServlet(plugin)), "/images/*");
 
-            // ===== API ENDPOINTS =====
             context.addServlet(new ServletHolder(new AuthController(plugin)), "/api/auth/*");
             context.addServlet(new ServletHolder(new DashboardController(plugin)), "/api/dashboard/*");
             context.addServlet(new ServletHolder(new PlayerController(plugin)), "/api/players/*");
             context.addServlet(new ServletHolder(new PunishmentController(plugin)), "/api/punishments/*");
             context.addServlet(new ServletHolder(new SettingsController(plugin)), "/api/settings/*");
 
-            // ===== HTML PAGES =====
             context.addServlet(new ServletHolder(new PageServlet(plugin, "login")), "/login");
             context.addServlet(new ServletHolder(new PageServlet(plugin, "dashboard")), "/dashboard");
             context.addServlet(new ServletHolder(new PageServlet(plugin, "players")), "/players");
@@ -70,17 +75,18 @@ public class WebServer {
             context.addServlet(new ServletHolder(new PageServlet(plugin, "player-card")), "/player/*");
             context.addServlet(new ServletHolder(new PageServlet(plugin, "player-card-embed")), "/embed/*");
 
-            // ===== ERROR PAGES =====
             context.addServlet(new ServletHolder(new ErrorPageServlet(plugin, "404")), "/404");
             context.addServlet(new ServletHolder(new ErrorPageServlet(plugin, "500")), "/500");
             context.addServlet(new ServletHolder(new ErrorPageServlet(plugin, "error")), "/error");
 
-            // ===== ROOT =====
             context.addServlet(new ServletHolder(new RootServlet()), "/");
 
             server.start();
             running = true;
             plugin.getSXBansLogger().info("Web server started on " + host + ":" + port);
+
+            org.bukkit.Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,
+                    this::cleanupExpiredSessions, 20L * 60 * 10, 20L * 60 * 10);
 
         } catch (Exception e) {
             plugin.getSXBansLogger().severe("Failed to start web server: " + e.getMessage());
@@ -108,22 +114,37 @@ public class WebServer {
     }
 
     public void createSession(String token, String username) {
-        if (token != null && username != null) sessionCache.put(token, username);
+        if (token == null || username == null) return;
+        long timeoutSeconds = plugin.getConfigManager().getLong("web.session.timeout", 86400L);
+        sessionCache.put(token, new SessionEntry(username, System.currentTimeMillis() + timeoutSeconds * 1000L));
     }
 
     public boolean isValidSession(String token) {
         if (token == null) return false;
-        return sessionCache.containsKey(token);
+        SessionEntry entry = sessionCache.get(token);
+        if (entry == null) return false;
+        if (System.currentTimeMillis() > entry.expiresAt) {
+            sessionCache.remove(token);
+            return false;
+        }
+        return true;
     }
 
     public String getUsernameFromSession(String token) {
         if (token == null) return null;
-        return sessionCache.get(token);
+        SessionEntry entry = sessionCache.get(token);
+        if (entry == null) return null;
+        if (System.currentTimeMillis() > entry.expiresAt) {
+            sessionCache.remove(token);
+            return null;
+        }
+        return entry.username;
     }
 
-    // ======================================================================
-    // SERVLETS
-    // ======================================================================
+    private void cleanupExpiredSessions() {
+        long now = System.currentTimeMillis();
+        sessionCache.entrySet().removeIf(e -> now > e.getValue().expiresAt);
+    }
 
     private static class RootServlet extends HttpServlet {
         @Override
@@ -147,12 +168,23 @@ public class WebServer {
                 return;
             }
 
+            if (path.contains("..") || path.contains("\0")) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+
             String resourcePath = "/web" + path;
             InputStream inputStream = getClass().getResourceAsStream(resourcePath);
 
             if (inputStream == null) {
-                File externalFile = new File(plugin.getDataFolder(), "web" + path);
-                if (externalFile.exists()) {
+                File webRoot = new File(plugin.getDataFolder(), "web").getCanonicalFile();
+                File externalFile = new File(webRoot, path).getCanonicalFile();
+
+                if (!externalFile.getPath().startsWith(webRoot.getPath() + File.separator) && !externalFile.equals(webRoot)) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+                if (externalFile.exists() && externalFile.isFile()) {
                     inputStream = new FileInputStream(externalFile);
                 }
             }
@@ -273,9 +305,6 @@ public class WebServer {
         }
     }
 
-    // ======================================================================
-    // ERROR PAGE SERVLET
-    // ======================================================================
     private static class ErrorPageServlet extends HttpServlet {
         private final SXBans plugin;
         private final String errorPage;

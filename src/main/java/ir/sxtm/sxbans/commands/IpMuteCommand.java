@@ -33,7 +33,6 @@ public class IpMuteCommand extends BaseCommand {
         String ip;
         String playerName = null;
 
-        // Check if target is a player or IP
         Player player = Bukkit.getPlayer(target);
         if (player != null) {
             ip = player.getAddress().getAddress().getHostAddress();
@@ -45,40 +44,39 @@ public class IpMuteCommand extends BaseCommand {
             return true;
         }
 
-        // Check if IP is already muted
         if (plugin.getPunishmentManager().isIpMuted(ip)) {
             sendMessage(sender, "error.already-muted", Map.of("player", ip));
             return true;
         }
 
-        // Apply IP mute
         UUID executorUUID = sender instanceof Player ? ((Player) sender).getUniqueId() :
                 UUID.fromString("00000000-0000-0000-0000-000000000000");
         String executorName = sender.getName();
 
+        UUID targetUUID = player != null ? player.getUniqueId() : UUID.randomUUID();
+
         Punishment punishment = plugin.getPunishmentManager().applyPunishment(
-                UUID.randomUUID(),
+                targetUUID,
                 playerName != null ? playerName : ip,
                 PunishmentType.IP_MUTE,
                 reason,
                 -1,
                 executorUUID,
-                executorName
+                executorName,
+                ip
         );
 
         if (punishment != null) {
-            punishment.setIpAddress(ip);
-            plugin.getPunishmentStorage().savePunishment(punishment);
 
-            // Notify all players with this IP
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                if (onlinePlayer.getAddress().getAddress().getHostAddress().equals(ip)) {
+                if (onlinePlayer.getAddress() != null && onlinePlayer.getAddress().getAddress() != null &&
+                        onlinePlayer.getAddress().getAddress().getHostAddress().equals(ip)) {
                     onlinePlayer.sendMessage(plugin.getMessagesManager().getMuteMessage(punishment));
                 }
             }
 
             sendMessage(sender, "success.ipmute", Map.of("ip", ip));
-            broadcastPunishment(punishment);
+
         }
 
         return true;

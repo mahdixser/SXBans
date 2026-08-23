@@ -71,12 +71,6 @@ public class UnbanCommand extends BaseCommand {
         if (success) {
             sendRawMessage(sender, "&a" + playerName + " has been unbanned successfully!");
 
-            String broadcast = plugin.getMessagesManager().getColoredMessage("broadcast.unban",
-                    Map.of("player", playerName, "executor", removerName));
-            if (broadcast != null && !broadcast.isEmpty()) {
-                Bukkit.broadcastMessage(broadcast);
-            }
-
             plugin.getSXBansLogger().info("Player " + playerName + " was unbanned successfully by " + removerName);
         } else {
             sendRawMessage(sender, "&cFailed to unban " + playerName + "! Check console for errors.");

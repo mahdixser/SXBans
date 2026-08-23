@@ -58,7 +58,6 @@ public class BanWaveManager {
             wave.setCompletedAt(System.currentTimeMillis());
             isRunning = false;
 
-            // Log the ban wave
             plugin.getLogger().info("Ban wave '" + name + "' completed. Affected: " +
                     wave.getAffectedPlayers().size() + " players");
         });
@@ -90,7 +89,7 @@ public class BanWaveManager {
     }
 
     private String getPlayerName(UUID uuid) {
-        // Try to get from cache or database
+
         return plugin.getServer().getOfflinePlayer(uuid).getName();
     }
 
@@ -126,7 +125,6 @@ public class BanWaveManager {
             affectedPlayers.add(uuid);
         }
 
-        // Getters and Setters
         public UUID getId() { return id; }
         public String getName() { return name; }
         public String getReason() { return reason; }

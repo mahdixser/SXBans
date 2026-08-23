@@ -16,6 +16,17 @@ public class HistoryEntry {
     private String serverName;
     private String worldName;
 
+    public HistoryEntry() {
+        this.id = null;
+        this.playerUUID = null;
+        this.playerName = null;
+        this.action = null;
+        this.details = null;
+        this.executorUUID = null;
+        this.executorName = null;
+        this.timestamp = 0;
+    }
+
     public HistoryEntry(UUID id, UUID playerUUID, String playerName, String action,
                         String details, UUID executorUUID, String executorName) {
         this.id = id;
@@ -28,7 +39,6 @@ public class HistoryEntry {
         this.timestamp = Instant.now().toEpochMilli();
     }
 
-    // Getters and Setters
     public UUID getId() { return id; }
     public UUID getPlayerUUID() { return playerUUID; }
     public String getPlayerName() { return playerName; }

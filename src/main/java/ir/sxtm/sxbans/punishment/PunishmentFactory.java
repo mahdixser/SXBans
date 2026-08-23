@@ -42,7 +42,7 @@ public class PunishmentFactory {
     public Punishment createIPBan(String ip, String playerName, String reason, UUID executorUUID, String executorName) {
         Punishment punishment = new Punishment(
                 UUID.randomUUID(),
-                UUID.randomUUID(), // Placeholder UUID for IP ban
+                UUID.randomUUID(),
                 playerName != null ? playerName : "Unknown",
                 PunishmentType.IP_BAN,
                 reason,
@@ -57,7 +57,7 @@ public class PunishmentFactory {
     public Punishment createIPMute(String ip, String playerName, String reason, UUID executorUUID, String executorName) {
         Punishment punishment = new Punishment(
                 UUID.randomUUID(),
-                UUID.randomUUID(), // Placeholder UUID for IP mute
+                UUID.randomUUID(),
                 playerName != null ? playerName : "Unknown",
                 PunishmentType.IP_MUTE,
                 reason,
@@ -113,8 +113,7 @@ public class PunishmentFactory {
     }
 
     public Punishment createFromTemplate(String templateName, Player target, UUID executorUUID, String executorName) {
-        // This would load a template from config and create a punishment
-        // Placeholder implementation
+
         return createBan(target, "Template: " + templateName, executorUUID, executorName);
     }
 }

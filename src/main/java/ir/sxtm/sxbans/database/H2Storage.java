@@ -17,7 +17,6 @@ public class H2Storage {
         this.dbManager = plugin.getDatabaseManager();
     }
 
-    // Punishment CRUD operations
     public void savePunishment(Punishment punishment) {
         String sql = "MERGE INTO punishments KEY(id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -150,7 +149,6 @@ public class H2Storage {
         }
     }
 
-    // History operations
     public void saveHistory(HistoryEntry entry) {
         String sql = "INSERT INTO history (id, player_uuid, player_name, action, details, " +
                 "executor_uuid, executor_name, timestamp, ip_address, server_name, world_name) " +
@@ -215,7 +213,6 @@ public class H2Storage {
         return history;
     }
 
-    // IP Data operations
     public void saveIPData(IPData ipData) {
         String sql = "MERGE INTO ip_data KEY(ip_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -276,7 +273,6 @@ public class H2Storage {
         return ipDataList;
     }
 
-    // Helper methods
     private void setPunishmentParameters(PreparedStatement stmt, Punishment p) throws SQLException {
         stmt.setString(1, p.getId().toString());
         stmt.setString(2, p.getPlayerUUID().toString());

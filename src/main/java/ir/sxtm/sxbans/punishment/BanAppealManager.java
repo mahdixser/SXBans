@@ -32,7 +32,6 @@ public class BanAppealManager {
         appeals.put(request.getId(), request);
         playerAppeals.computeIfAbsent(playerUUID, k -> new ArrayList<>()).add(request);
 
-        // Notify staff
         notifyStaff(request);
     }
 
@@ -48,7 +47,7 @@ public class BanAppealManager {
         request.setReviewedAt(System.currentTimeMillis());
 
         if (status == AppealStatus.APPROVED) {
-            // Unban the player
+
             Punishment punishment = plugin.getPunishmentStorage().getPunishment(request.getPunishmentId());
             if (punishment != null) {
                 plugin.getPunishmentManager().removePunishment(
@@ -60,7 +59,6 @@ public class BanAppealManager {
             }
         }
 
-        // Notify player
         notifyPlayer(request);
 
         return true;
@@ -85,7 +83,7 @@ public class BanAppealManager {
     }
 
     private void notifyStaff(AppealRequest request) {
-        // Send notification to online staff
+
         String message = plugin.getMessagesManager().getColoredMessage("appeal.submitted",
                 Map.of("player", request.getPlayerName(), "reason", request.getReason()));
 
@@ -95,12 +93,11 @@ public class BanAppealManager {
     }
 
     private void notifyPlayer(AppealRequest request) {
-        // Send notification to player
+
         String message = plugin.getMessagesManager().getColoredMessage("appeal." +
                         request.getStatus().name().toLowerCase(),
                 Map.of("response", request.getResponse() != null ? request.getResponse() : ""));
 
-        // If player is online, send message
         Player player = plugin.getServer().getPlayer(request.getPlayerUUID());
         if (player != null) {
             player.sendMessage(message);
@@ -138,7 +135,6 @@ public class BanAppealManager {
             this.status = status;
         }
 
-        // Getters and Setters
         public UUID getId() { return id; }
         public UUID getPlayerUUID() { return playerUUID; }
         public String getPlayerName() { return playerName; }

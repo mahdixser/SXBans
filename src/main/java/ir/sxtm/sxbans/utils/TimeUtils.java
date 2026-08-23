@@ -4,28 +4,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Utility class for time parsing and formatting.
- */
 public class TimeUtils {
     private static final Pattern TIME_PATTERN = Pattern.compile(
             "(?:(\\d+)y)?(?:(\\d+)M)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?"
     );
 
-    /**
-     * Parse a time string to milliseconds.
-     * Supported formats: 1y, 2M, 3w, 4d, 5h, 6m, 7s
-     * Example: "1d2h30m" = 1 day, 2 hours, 30 minutes
-     *
-     * @param timeStr The time string
-     * @return Time in milliseconds, or -1 if invalid
-     */
     public static long parseTime(String timeStr) {
         if (timeStr == null || timeStr.trim().isEmpty()) {
             return -1;
         }
 
-        // Handle special cases
         if (timeStr.equalsIgnoreCase("permanent") || timeStr.equals("-1")) {
             return -1;
         }
@@ -35,12 +23,11 @@ public class TimeUtils {
         }
 
         try {
-            // Try parsing as simple number (seconds)
+
             if (timeStr.matches("\\d+")) {
                 return Long.parseLong(timeStr) * 1000;
             }
 
-            // Parse time format
             Matcher matcher = TIME_PATTERN.matcher(timeStr);
             if (!matcher.matches()) {
                 return -1;
@@ -85,12 +72,6 @@ public class TimeUtils {
         }
     }
 
-    /**
-     * Format milliseconds to a human-readable string.
-     *
-     * @param millis Time in milliseconds
-     * @return Formatted string
-     */
     public static String formatTime(long millis) {
         if (millis < 0) {
             return "Permanent";
@@ -123,12 +104,6 @@ public class TimeUtils {
         return sb.toString();
     }
 
-    /**
-     * Format milliseconds to a detailed human-readable string.
-     *
-     * @param millis Time in milliseconds
-     * @return Formatted string
-     */
     public static String formatTimeDetailed(long millis) {
         if (millis < 0) {
             return "Permanent";
@@ -168,106 +143,47 @@ public class TimeUtils {
         return sb.toString();
     }
 
-    /**
-     * Get the current timestamp in milliseconds.
-     *
-     * @return Current timestamp
-     */
     public static long now() {
         return System.currentTimeMillis();
     }
 
-    /**
-     * Get the current timestamp in seconds.
-     *
-     * @return Current timestamp in seconds
-     */
     public static long nowSeconds() {
         return System.currentTimeMillis() / 1000;
     }
 
-    /**
-     * Check if a time has expired.
-     *
-     * @param startTime The start time in milliseconds
-     * @param duration The duration in milliseconds
-     * @return true if expired
-     */
     public static boolean isExpired(long startTime, long duration) {
         if (duration < 0) return false;
         return System.currentTimeMillis() > (startTime + duration);
     }
 
-    /**
-     * Get remaining time.
-     *
-     * @param startTime The start time in milliseconds
-     * @param duration The duration in milliseconds
-     * @return Remaining time in milliseconds
-     */
     public static long getRemaining(long startTime, long duration) {
         if (duration < 0) return -1;
         long remaining = (startTime + duration) - System.currentTimeMillis();
         return Math.max(0, remaining);
     }
 
-    /**
-     * Convert seconds to ticks (20 ticks per second).
-     *
-     * @param seconds The seconds
-     * @return Ticks
-     */
     public static long secondsToTicks(long seconds) {
         return seconds * 20;
     }
 
-    /**
-     * Convert milliseconds to ticks.
-     *
-     * @param millis The milliseconds
-     * @return Ticks
-     */
     public static long millisToTicks(long millis) {
         return (millis / 50);
     }
 
-    /**
-     * Convert ticks to milliseconds.
-     *
-     * @param ticks The ticks
-     * @return Milliseconds
-     */
     public static long ticksToMillis(long ticks) {
         return ticks * 50;
     }
 
-    /**
-     * Check if a string is a valid time format.
-     *
-     * @param timeStr The time string
-     * @return true if valid
-     */
     public static boolean isValidTimeFormat(String timeStr) {
         if (timeStr == null) return false;
         if (timeStr.equalsIgnoreCase("permanent") || timeStr.equals("-1")) return true;
         return parseTime(timeStr) >= 0;
     }
 
-    /**
-     * Get the current date/time as a formatted string.
-     *
-     * @param format The format pattern
-     * @return Formatted date/time
-     */
     public static String getFormattedDateTime(String format) {
         return new java.text.SimpleDateFormat(format).format(new java.util.Date());
     }
 
-    /**
-     * Get the current date/time as ISO format.
-     *
-     * @return ISO formatted date/time
-     */
     public static String getISODateTime() {
         return new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new java.util.Date());
     }

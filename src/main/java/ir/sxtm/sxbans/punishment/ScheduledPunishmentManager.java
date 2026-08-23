@@ -22,13 +22,11 @@ public class ScheduledPunishmentManager {
         this.activeTasks = new ConcurrentHashMap<>();
         this.isShutdown = false;
 
-        // Load scheduled punishments from storage
         loadScheduledPunishments();
     }
 
     private void loadScheduledPunishments() {
-        // This would load from a database or file
-        // Placeholder implementation
+
         plugin.getSXBansLogger().info("Scheduled punishment manager initialized");
     }
 
@@ -51,14 +49,12 @@ public class ScheduledPunishmentManager {
 
         scheduledPunishments.put(scheduled.getId(), scheduled);
 
-        // Schedule the punishment
         long delay = scheduledTime - System.currentTimeMillis();
         if (delay <= 0) {
-            // Execute immediately
+
             executeScheduledPunishment(scheduled);
         } else {
-            // Schedule for later - Fix: Use delay directly (Bukkit uses ticks, but runTaskLaterAsynchronously accepts ticks)
-            // Convert milliseconds to ticks (20 ticks per second)
+
             long ticks = Math.max(1, delay / 50);
             BukkitTask task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
                     () -> executeScheduledPunishment(scheduled),
@@ -89,7 +85,6 @@ public class ScheduledPunishmentManager {
             scheduled.setExecutionTime(System.currentTimeMillis());
             scheduled.setPunishmentId(punishment.getId());
 
-            // Remove from active tasks
             BukkitTask task = activeTasks.remove(scheduled.getId());
             if (task != null) {
                 task.cancel();
@@ -104,7 +99,6 @@ public class ScheduledPunishmentManager {
         ScheduledPunishment scheduled = scheduledPunishments.get(id);
         if (scheduled == null || scheduled.isExecuted()) return;
 
-        // Cancel the task
         BukkitTask task = activeTasks.remove(id);
         if (task != null) {
             task.cancel();
@@ -142,7 +136,6 @@ public class ScheduledPunishmentManager {
     public void shutdown() {
         isShutdown = true;
 
-        // Cancel all active tasks
         for (BukkitTask task : activeTasks.values()) {
             task.cancel();
         }
@@ -182,7 +175,6 @@ public class ScheduledPunishmentManager {
             this.cancelled = false;
         }
 
-        // Getters and Setters
         public UUID getId() { return id; }
         public UUID getTargetUUID() { return targetUUID; }
         public String getTargetName() { return targetName; }

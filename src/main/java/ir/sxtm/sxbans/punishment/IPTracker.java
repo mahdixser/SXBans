@@ -25,9 +25,16 @@ public class IPTracker {
     }
 
     private void loadAllIPData() {
-        // getAllIPData doesn't exist, so we'll load from cache or initialize empty
-        // The IP data will be loaded as players join
-        plugin.getSXBansLogger().info("IP tracker initialized");
+
+        List<IPData> allData = plugin.getPunishmentStorage().getAllIPData();
+        for (IPData data : allData) {
+            ipDataCache.put(data.getIpAddress(), data);
+            ipPlayerMapping.put(data.getIpAddress(), new HashSet<>(data.getPlayerUUIDs()));
+            for (UUID uuid : data.getPlayerUUIDs()) {
+                playerIPHistory.computeIfAbsent(uuid, k -> new HashSet<>()).add(data.getIpAddress());
+            }
+        }
+        plugin.getSXBansLogger().info("IP tracker initialized with " + allData.size() + " known IPs");
     }
 
     public void trackIP(String ip, UUID playerUUID, String playerName) {
@@ -39,7 +46,6 @@ public class IPTracker {
         ipPlayerMapping.computeIfAbsent(ip, k -> new HashSet<>()).add(playerUUID);
         playerIPHistory.computeIfAbsent(playerUUID, k -> new HashSet<>()).add(ip);
 
-        // Save to storage
         plugin.getPunishmentStorage().saveIPData(data);
     }
 
@@ -103,8 +109,7 @@ public class IPTracker {
     }
 
     public String getGeoInfo(String ip) {
-        // This would call an external API for geo-location
-        // Placeholder implementation
+
         try {
             InetAddress address = InetAddress.getByName(ip);
             return "Location: " + address.getHostAddress();
@@ -114,7 +119,7 @@ public class IPTracker {
     }
 
     public void cleanup() {
-        // Remove old data (30 days)
+
         long cutoff = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000);
         ipDataCache.values().removeIf(data -> data.getLastSeen() < cutoff);
     }

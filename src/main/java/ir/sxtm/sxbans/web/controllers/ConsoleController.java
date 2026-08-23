@@ -39,15 +39,14 @@ public class ConsoleController extends HttpServlet {
         this.consoleLogs = new ArrayList<>();
     }
 
-    // Removed @Override - this resolves "Method does not override method from its superclass"
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = req.getPathInfo();
         resp.setContentType("application/json");
 
         try {
-            if (!isAuthenticated(req)) {
-                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                resp.getWriter().write(gson.toJson(new WebResponse(false, "Unauthorized")));
+            if (!hasConsolePermission(req)) {
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                resp.getWriter().write(gson.toJson(new WebResponse(false, "You do not have permission to use the console")));
                 return;
             }
 
@@ -65,15 +64,14 @@ public class ConsoleController extends HttpServlet {
         }
     }
 
-    // Removed @Override - this resolves "Method does not override method from its superclass"
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = req.getPathInfo();
         resp.setContentType("application/json");
 
         try {
-            if (!isAuthenticated(req)) {
-                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                resp.getWriter().write(gson.toJson(new WebResponse(false, "Unauthorized")));
+            if (!hasConsolePermission(req)) {
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                resp.getWriter().write(gson.toJson(new WebResponse(false, "You do not have permission to use the console")));
                 return;
             }
 
@@ -112,7 +110,6 @@ public class ConsoleController extends HttpServlet {
     private void handleGetCommands(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         JsonArray commands = new JsonArray();
 
-        // Fix: Get command map using reflection to access getKnownCommands
         try {
             Server server = Bukkit.getServer();
             Method getCommandMapMethod = server.getClass().getMethod("getCommandMap");
@@ -121,7 +118,6 @@ public class ConsoleController extends HttpServlet {
             if (commandMap instanceof SimpleCommandMap) {
                 SimpleCommandMap simpleCommandMap = (SimpleCommandMap) commandMap;
 
-                // Use reflection to access getKnownCommands method
                 Method getKnownCommandsMethod = SimpleCommandMap.class.getDeclaredMethod("getKnownCommands");
                 getKnownCommandsMethod.setAccessible(true);
 
@@ -136,7 +132,6 @@ public class ConsoleController extends HttpServlet {
             plugin.getSXBansLogger().warning("Failed to get command map: " + e.getMessage());
         }
 
-        // Add common commands
         String[] commonCommands = {"ban", "tempban", "unban", "kick", "mute", "tempmute", "unmute",
                 "warn", "history", "check", "ipban", "ipunban", "ipmute", "ipunmute", "sxbans",
                 "gamemode", "tp", "spawn", "setspawn", "kit", "give", "clear", "whitelist", "op", "deop",
@@ -210,6 +205,18 @@ public class ConsoleController extends HttpServlet {
         return token != null && plugin.getWebServer().isValidSession(token);
     }
 
+    private boolean hasConsolePermission(HttpServletRequest req) {
+        String token = getAuthToken(req);
+        if (token == null || !plugin.getWebServer().isValidSession(token)) return false;
+
+        String username = plugin.getWebServer().getUsernameFromSession(token);
+        if (username == null) return false;
+
+        ir.sxtm.sxbans.models.WebUser user = plugin.getWebUsersManager().getUser(username);
+        return user != null && user.isEnabled() &&
+                (user.hasPermission("*") || user.hasPermission("sxbans.web.admin") || user.hasPermission("sxbans.web.console"));
+    }
+
     private String getAuthToken(HttpServletRequest req) {
         String auth = req.getHeader("Authorization");
         if (auth != null && auth.startsWith("Bearer ")) {
@@ -261,7 +268,6 @@ public class ConsoleController extends HttpServlet {
             this.permissions = new HashSet<>();
         }
 
-        // CommandSender methods
         public void sendMessage(String message) {
             messages.add(message);
         }
@@ -323,11 +329,11 @@ public class ConsoleController extends HttpServlet {
         }
 
         public void removeAttachment(PermissionAttachment permissionAttachment) {
-            // Do nothing
+
         }
 
         public void recalculatePermissions() {
-            // Do nothing
+
         }
 
         public Set<PermissionAttachmentInfo> getEffectivePermissions() {
@@ -339,7 +345,7 @@ public class ConsoleController extends HttpServlet {
         }
 
         public void setOp(boolean value) {
-            // Do nothing
+
         }
 
         public boolean isPlayer() {

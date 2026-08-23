@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* ===== SAME STYLES AS DASHBOARD (با تنظیمات اضافه) ===== */
+
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Inter', -apple-system, sans-serif;
@@ -145,7 +145,6 @@
         }
         .btn-secondary:hover { background:rgba(255,255,255,0.1); }
 
-        /* ===== SETTINGS SPECIFIC ===== */
         .settings-container { display:grid; grid-template-columns:200px 1fr; gap:20px; }
         .settings-tabs { display:flex; flex-direction:column; gap:4px; }
         .tab-btn {
@@ -350,9 +349,9 @@
         </ul>
         <div class="sidebar-footer">
             <div class="user-info">
-                <img src="https://crafatar.com/avatars/{{uuid}}?size=32" alt="User" class="user-avatar">
+                <img src="https://minotar.net/avatar/00000000-0000-0000-0000-000000000000/32" alt="User" class="user-avatar" id="sidebarAvatar">
                 <div>
-                    <span class="user-name">{{username}}</span>
+                    <span class="user-name" id="sidebarUsername">{{username}}</span>
                     <span class="user-level">Level {{user_level}}</span>
                 </div>
             </div>
@@ -429,7 +428,6 @@
     </main>
 </div>
 
-<!-- Add User Modal -->
 <div class="modal-overlay" id="addUserModal" style="display:none;">
     <div class="modal-content">
         <button class="modal-close" onclick="closeAddUserModal()"><i class="fas fa-times"></i></button>
@@ -446,6 +444,19 @@
 <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login';
+
+    function updateSidebarAvatar() {
+        const avatar = document.getElementById('sidebarAvatar');
+        const nameEl = document.getElementById('sidebarUsername');
+        const username = localStorage.getItem('username') || 'Admin';
+
+        if (avatar) {
+            avatar.src = 'https://minotar.net/avatar/00000000-0000-0000-0000-000000000000/32';
+        }
+        if (nameEl) {
+            nameEl.textContent = username;
+        }
+    }
 
     function logout() { localStorage.clear(); window.location.href = '/login'; }
 
@@ -564,7 +575,11 @@
         } catch (error) { alert('Connection error'); }
     }
 
-    document.addEventListener('DOMContentLoaded', () => { loadSettings(); loadUsers(); });
+    document.addEventListener('DOMContentLoaded', () => {
+        updateSidebarAvatar();
+        loadSettings();
+        loadUsers();
+    });
 </script>
 </body>
 </html>

@@ -9,13 +9,9 @@ import ir.sxtm.sxbans.models.Punishment;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Cache manager using Caffeine for high-performance caching.
- */
 public class CacheManager {
     private final SXBans plugin;
 
-    // Caches
     private final Cache<UUID, Boolean> bannedCache;
     private final Cache<UUID, Boolean> mutedCache;
     private final Cache<String, Boolean> ipBannedCache;
@@ -30,7 +26,6 @@ public class CacheManager {
     public CacheManager(SXBans plugin) {
         this.plugin = plugin;
 
-        // Initialize caches with appropriate sizes and expiry
         this.bannedCache = Caffeine.newBuilder()
                 .expireAfterWrite(5, TimeUnit.MINUTES)
                 .maximumSize(1000)
@@ -82,7 +77,6 @@ public class CacheManager {
                 .build();
     }
 
-    // Banned cache methods
     public boolean isBanned(UUID uuid) {
         Boolean cached = bannedCache.getIfPresent(uuid);
         if (cached != null) {
@@ -97,7 +91,6 @@ public class CacheManager {
         bannedCache.invalidate(uuid);
     }
 
-    // Muted cache methods
     public boolean isMuted(UUID uuid) {
         Boolean cached = mutedCache.getIfPresent(uuid);
         if (cached != null) {
@@ -112,7 +105,6 @@ public class CacheManager {
         mutedCache.invalidate(uuid);
     }
 
-    // IP Banned cache methods
     public boolean isIpBanned(String ip) {
         Boolean cached = ipBannedCache.getIfPresent(ip);
         if (cached != null) {
@@ -127,7 +119,6 @@ public class CacheManager {
         ipBannedCache.invalidate(ip);
     }
 
-    // IP Muted cache methods
     public boolean isIpMuted(String ip) {
         Boolean cached = ipMutedCache.getIfPresent(ip);
         if (cached != null) {
@@ -142,7 +133,6 @@ public class CacheManager {
         ipMutedCache.invalidate(ip);
     }
 
-    // Warning cache methods
     public int getWarnings(UUID uuid) {
         Integer cached = warningCache.getIfPresent(uuid);
         if (cached != null) {
@@ -157,7 +147,6 @@ public class CacheManager {
         warningCache.invalidate(uuid);
     }
 
-    // Active ban cache methods
     public Punishment getActiveBan(UUID uuid) {
         Punishment cached = activeBanCache.getIfPresent(uuid);
         if (cached != null) {
@@ -174,7 +163,6 @@ public class CacheManager {
         activeBanCache.invalidate(uuid);
     }
 
-    // Active mute cache methods
     public Punishment getActiveMute(UUID uuid) {
         Punishment cached = activeMuteCache.getIfPresent(uuid);
         if (cached != null) {
@@ -191,13 +179,12 @@ public class CacheManager {
         activeMuteCache.invalidate(uuid);
     }
 
-    // Active IP ban cache methods
     public Punishment getActiveIpBan(String ip) {
         Punishment cached = activeIpBanCache.getIfPresent(ip);
         if (cached != null) {
             return cached;
         }
-        // Need to find active IP ban
+
         for (Punishment p : plugin.getPunishmentManager().getAllActivePunishments()) {
             if (p.getType() == Punishment.PunishmentType.IP_BAN && ip.equals(p.getIpAddress())) {
                 activeIpBanCache.put(ip, p);
@@ -211,7 +198,6 @@ public class CacheManager {
         activeIpBanCache.invalidate(ip);
     }
 
-    // Active IP mute cache methods
     public Punishment getActiveIpMute(String ip) {
         Punishment cached = activeIpMuteCache.getIfPresent(ip);
         if (cached != null) {
@@ -230,7 +216,6 @@ public class CacheManager {
         activeIpMuteCache.invalidate(ip);
     }
 
-    // Player punishments cache
     public java.util.List<Punishment> getPlayerPunishments(UUID uuid) {
         java.util.List<Punishment> cached = playerPunishmentsCache.getIfPresent(uuid);
         if (cached != null) {
@@ -245,11 +230,6 @@ public class CacheManager {
         playerPunishmentsCache.invalidate(uuid);
     }
 
-    /**
-     * Invalidate all caches for a player.
-     *
-     * @param uuid The player UUID
-     */
     public void invalidatePlayer(UUID uuid) {
         invalidateBanned(uuid);
         invalidateMuted(uuid);
@@ -259,9 +239,6 @@ public class CacheManager {
         invalidatePlayerPunishments(uuid);
     }
 
-    /**
-     * Clear all caches.
-     */
     public void clearAll() {
         bannedCache.invalidateAll();
         mutedCache.invalidateAll();
@@ -275,11 +252,6 @@ public class CacheManager {
         playerPunishmentsCache.invalidateAll();
     }
 
-    /**
-     * Get cache statistics.
-     *
-     * @return Map of cache statistics
-     */
     public java.util.Map<String, Object> getStats() {
         java.util.Map<String, Object> stats = new java.util.HashMap<>();
         stats.put("bannedCacheSize", bannedCache.estimatedSize());

@@ -8,10 +8,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-/**
- * Advanced logging system for SX Bans.
- * Supports console, file, database, and web logging.
- */
 public class SXBansLogger {
     private final SXBans plugin;
     private final java.util.logging.Logger bukkitLogger;
@@ -32,7 +28,6 @@ public class SXBansLogger {
         this.logFile = new File(plugin.getDataFolder(), "logs" + File.separator + "sxbans.log");
         this.running = true;
 
-        // Load settings with null check - ConfigManager might not be ready yet
         ConfigManager configManager = plugin.getConfigManager();
         if (configManager != null) {
             try {
@@ -40,28 +35,23 @@ public class SXBansLogger {
                 this.fileLogging = configManager.isFileLogging();
                 this.webLogging = configManager.isWebLogging();
             } catch (Exception e) {
-                // If there's any error reading config, use defaults
+
                 this.consoleLogging = true;
                 this.fileLogging = true;
                 this.webLogging = true;
             }
         } else {
-            // Default values if ConfigManager is not ready
+
             this.consoleLogging = true;
             this.fileLogging = true;
             this.webLogging = true;
         }
 
-        // Create logs directory
         logFile.getParentFile().mkdirs();
 
-        // Start log processor thread
         startLogProcessor();
     }
 
-    /**
-     * Start the log processor thread.
-     */
     private void startLogProcessor() {
         logThread = new Thread(() -> {
             while (running) {
@@ -84,31 +74,24 @@ public class SXBansLogger {
         logThread.start();
     }
 
-    /**
-     * Process a single log entry.
-     */
     private void processLog(String log) {
-        // Console logging
+
         if (consoleLogging) {
             bukkitLogger.info(log);
         }
 
-        // File logging
         if (fileLogging) {
             writeToFile(log);
         }
 
-        // Web logging
         if (webLogging) {
             sendToWeb(log);
         }
     }
 
-    /**
-     * Write log to file.
-     */
     private void writeToFile(String log) {
-        try (FileWriter fw = new FileWriter(logFile, true);
+
+        try (OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(logFile, true), java.nio.charset.StandardCharsets.UTF_8);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
             out.println(log);
@@ -117,53 +100,30 @@ public class SXBansLogger {
         }
     }
 
-    /**
-     * Send log to web panel.
-     */
     private void sendToWeb(String log) {
-        // Send via WebSocket if available
+
         if (plugin.getWebServer() != null && plugin.getWebServer().isRunning()) {
-            // This would be sent to WebSocket clients
+
         }
     }
 
-    /**
-     * Log an info message.
-     *
-     * @param message The message
-     */
     public void info(String message) {
         String log = formatLog("INFO", message);
         logQueue.offer(log);
     }
 
-    /**
-     * Log a warning message.
-     *
-     * @param message The message
-     */
     public void warning(String message) {
         String log = formatLog("WARN", message);
         logQueue.offer(log);
     }
 
-    /**
-     * Log a severe message.
-     *
-     * @param message The message
-     */
     public void severe(String message) {
         String log = formatLog("ERROR", message);
         logQueue.offer(log);
     }
 
-    /**
-     * Log a debug message.
-     *
-     * @param message The message
-     */
     public void debug(String message) {
-        // Check if debug is enabled - with null check
+
         boolean debugEnabled = false;
         try {
             ConfigManager configManager = plugin.getConfigManager();
@@ -171,7 +131,7 @@ public class SXBansLogger {
                 debugEnabled = configManager.getBoolean("debug", false);
             }
         } catch (Exception e) {
-            // If config is not ready, debug is disabled
+
             debugEnabled = false;
         }
 
@@ -181,12 +141,6 @@ public class SXBansLogger {
         }
     }
 
-    /**
-     * Log an exception.
-     *
-     * @param message The message
-     * @param e The exception
-     */
     public void error(String message, Throwable e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -195,51 +149,25 @@ public class SXBansLogger {
         logQueue.offer(log);
     }
 
-    /**
-     * Log a punishment event.
-     *
-     * @param type The event type
-     * @param details The event details
-     */
     public void logPunishment(String type, String details) {
         String log = formatLog("PUNISHMENT", type + " - " + details);
         logQueue.offer(log);
     }
 
-    /**
-     * Log a web event.
-     *
-     * @param type The event type
-     * @param details The event details
-     */
     public void logWeb(String type, String details) {
         String log = formatLog("WEB", type + " - " + details);
         logQueue.offer(log);
     }
 
-    /**
-     * Format a log message.
-     */
     private String formatLog(String level, String message) {
         String timestamp = dateFormat.format(new Date());
         return String.format("[%s] [SXBans/%s] %s", timestamp, level, message);
     }
 
-    /**
-     * Get the log file.
-     *
-     * @return The log file
-     */
     public File getLogFile() {
         return logFile;
     }
 
-    /**
-     * Read recent logs from file.
-     *
-     * @param lines Number of lines to read
-     * @return List of log lines
-     */
     public java.util.List<String> getRecentLogs(int lines) {
         java.util.List<String> recent = new java.util.ArrayList<>();
 
@@ -249,7 +177,6 @@ public class SXBansLogger {
             long fileLength = raf.length();
             if (fileLength == 0) return recent;
 
-            // Start from the end
             long pos = fileLength - 1;
             int linesRead = 0;
             StringBuilder line = new StringBuilder();
@@ -281,9 +208,6 @@ public class SXBansLogger {
         return recent;
     }
 
-    /**
-     * Clear the log file.
-     */
     public void clearLogs() {
         try {
             new FileWriter(logFile, false).close();
@@ -293,9 +217,6 @@ public class SXBansLogger {
         }
     }
 
-    /**
-     * Shutdown the logger.
-     */
     public void shutdown() {
         running = false;
         if (logThread != null) {
@@ -305,7 +226,6 @@ public class SXBansLogger {
             } catch (InterruptedException ignored) {}
         }
 
-        // Process remaining logs
         String log;
         while ((log = logQueue.poll()) != null) {
             if (consoleLogging) {
@@ -317,56 +237,26 @@ public class SXBansLogger {
         }
     }
 
-    /**
-     * Check if console logging is enabled.
-     *
-     * @return true if enabled
-     */
     public boolean isConsoleLogging() {
         return consoleLogging;
     }
 
-    /**
-     * Check if file logging is enabled.
-     *
-     * @return true if enabled
-     */
     public boolean isFileLogging() {
         return fileLogging;
     }
 
-    /**
-     * Check if web logging is enabled.
-     *
-     * @return true if enabled
-     */
     public boolean isWebLogging() {
         return webLogging;
     }
 
-    /**
-     * Set console logging.
-     *
-     * @param enabled true to enable
-     */
     public void setConsoleLogging(boolean enabled) {
         this.consoleLogging = enabled;
     }
 
-    /**
-     * Set file logging.
-     *
-     * @param enabled true to enable
-     */
     public void setFileLogging(boolean enabled) {
         this.fileLogging = enabled;
     }
 
-    /**
-     * Set web logging.
-     *
-     * @param enabled true to enable
-     */
     public void setWebLogging(boolean enabled) {
         this.webLogging = enabled;
     }

@@ -34,7 +34,7 @@ public class WebUsersManager {
             createDefaultUsers();
         }
 
-        try (Reader reader = new FileReader(usersFile)) {
+        try (Reader reader = new InputStreamReader(new FileInputStream(usersFile), java.nio.charset.StandardCharsets.UTF_8)) {
             Type type = new TypeToken<Map<String, WebUser>>(){}.getType();
             Map<String, WebUser> loadedUsers = gson.fromJson(reader, type);
 
@@ -53,15 +53,34 @@ public class WebUsersManager {
     }
 
     private void createDefaultUsers() {
-        WebUser admin = new WebUser("admin", BCrypt.hashpw("admin123", BCrypt.gensalt()), 100);
+
+        String randomPassword = generateSecureRandomPassword();
+        WebUser admin = new WebUser("admin", BCrypt.hashpw(randomPassword, BCrypt.gensalt()), 100);
         admin.addPermission("*");
         users.put("admin", admin);
         saveUsers();
-        plugin.getLogger().info("Created default web user: admin/admin123");
+
+        plugin.getLogger().warning("=================================================");
+        plugin.getLogger().warning(" SXBans Web Panel - Initial admin account password generated:");
+        plugin.getLogger().warning(" Username: admin");
+        plugin.getLogger().warning(" Password: " + randomPassword);
+        plugin.getLogger().warning(" Please log in now and change this password from Settings.");
+        plugin.getLogger().warning("=================================================");
+    }
+
+    private String generateSecureRandomPassword() {
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        StringBuilder sb = new StringBuilder(16);
+        for (int i = 0; i < 16; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 
     public void saveUsers() {
-        try (Writer writer = new FileWriter(usersFile)) {
+
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(usersFile), java.nio.charset.StandardCharsets.UTF_8)) {
             gson.toJson(users, writer);
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save web users: " + e.getMessage());
@@ -89,7 +108,7 @@ public class WebUsersManager {
         String hashedToken = BCrypt.hashpw(token, BCrypt.gensalt());
 
         user.setSessionToken(hashedToken);
-        user.setSessionExpiry(System.currentTimeMillis() + 86400000); // 24 hours
+        user.setSessionExpiry(System.currentTimeMillis() + 86400000);
         sessionTokens.put(token, username);
         saveUsers();
 

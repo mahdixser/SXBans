@@ -7,9 +7,6 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-/**
- * Thread pool manager for handling asynchronous tasks.
- */
 public class ThreadPoolManager {
     private final SXBans plugin;
     private final ExecutorService executorService;
@@ -20,40 +17,24 @@ public class ThreadPoolManager {
     public ThreadPoolManager(SXBans plugin) {
         this.plugin = plugin;
 
-        // Main executor for general tasks
         this.executorService = Executors.newCachedThreadPool(
                 new NamedThreadFactory("SXBans-Worker")
         );
 
-        // Scheduled executor for delayed/repeating tasks
         this.scheduledExecutorService = Executors.newScheduledThreadPool(
                 4,
                 new NamedThreadFactory("SXBans-Scheduler")
         );
 
-        // ForkJoinPool for parallel processing
         this.forkJoinPool = ForkJoinPool.commonPool();
 
         this.shutdown = false;
     }
 
-    /**
-     * Execute a task asynchronously.
-     *
-     * @param task The task to execute
-     * @return Future representing the task
-     */
     public CompletableFuture<Void> execute(Runnable task) {
         return CompletableFuture.runAsync(task, executorService);
     }
 
-    /**
-     * Execute a task asynchronously and return a result.
-     *
-     * @param task The task to execute
-     * @param <T> The result type
-     * @return Future representing the task
-     */
     public <T> CompletableFuture<T> submit(Callable<T> task) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -64,86 +45,34 @@ public class ThreadPoolManager {
         }, executorService);
     }
 
-    /**
-     * Execute a task asynchronously and return a result.
-     *
-     * @param task The task to execute
-     * @param <T> The result type
-     * @return Future representing the task
-     */
     public <T> CompletableFuture<T> submit(Supplier<T> task) {
         return CompletableFuture.supplyAsync(task, executorService);
     }
 
-    /**
-     * Schedule a task with a delay.
-     *
-     * @param task The task to execute
-     * @param delay The delay in milliseconds
-     * @return ScheduledFuture representing the task
-     */
     public ScheduledFuture<?> schedule(Runnable task, long delay) {
         return scheduledExecutorService.schedule(task, delay, TimeUnit.MILLISECONDS);
     }
 
-    /**
-     * Schedule a task with a delay and return a result.
-     *
-     * @param task The task to execute
-     * @param delay The delay in milliseconds
-     * @param <T> The result type
-     * @return ScheduledFuture representing the task
-     */
     public <T> ScheduledFuture<T> schedule(Callable<T> task, long delay) {
         return scheduledExecutorService.schedule(task, delay, TimeUnit.MILLISECONDS);
     }
 
-    /**
-     * Schedule a repeating task with a fixed delay.
-     *
-     * @param task The task to execute
-     * @param initialDelay The initial delay in milliseconds
-     * @param period The period in milliseconds
-     * @return ScheduledFuture representing the task
-     */
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long initialDelay, long period) {
         return scheduledExecutorService.scheduleWithFixedDelay(
                 task, initialDelay, period, TimeUnit.MILLISECONDS
         );
     }
 
-    /**
-     * Schedule a repeating task at a fixed rate.
-     *
-     * @param task The task to execute
-     * @param initialDelay The initial delay in milliseconds
-     * @param period The period in milliseconds
-     * @return ScheduledFuture representing the task
-     */
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long initialDelay, long period) {
         return scheduledExecutorService.scheduleAtFixedRate(
                 task, initialDelay, period, TimeUnit.MILLISECONDS
         );
     }
 
-    /**
-     * Execute a task using ForkJoinPool for parallel processing.
-     *
-     * @param task The task to execute
-     * @param <T> The result type
-     * @return Future representing the task
-     */
     public <T> ForkJoinTask<T> forkJoin(Callable<T> task) {
         return forkJoinPool.submit(task);
     }
 
-    /**
-     * Execute a batch of tasks in parallel.
-     *
-     * @param tasks The tasks to execute
-     * @param <T> The result type
-     * @return List of futures
-     */
     public <T> List<Future<T>> executeBatch(List<Callable<T>> tasks) {
         try {
             return executorService.invokeAll(tasks);
@@ -153,13 +82,6 @@ public class ThreadPoolManager {
         }
     }
 
-    /**
-     * Execute a batch of tasks and wait for completion.
-     *
-     * @param tasks The tasks to execute
-     * @param <T> The result type
-     * @return List of results
-     */
     public <T> List<T> executeBatchAndWait(List<Callable<T>> tasks) {
         try {
             return executorService.invokeAll(tasks).stream()
@@ -180,15 +102,11 @@ public class ThreadPoolManager {
         }
     }
 
-    /**
-     * Shutdown the thread pool.
-     */
     public void shutdown() {
         if (shutdown) return;
 
         shutdown = true;
 
-        // Shutdown executor service
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
@@ -199,7 +117,6 @@ public class ThreadPoolManager {
             Thread.currentThread().interrupt();
         }
 
-        // Shutdown scheduled executor
         scheduledExecutorService.shutdown();
         try {
             if (!scheduledExecutorService.awaitTermination(30, TimeUnit.SECONDS)) {
@@ -210,23 +127,12 @@ public class ThreadPoolManager {
             Thread.currentThread().interrupt();
         }
 
-        // ForkJoinPool doesn't need explicit shutdown
     }
 
-    /**
-     * Check if the thread pool is shutdown.
-     *
-     * @return true if shutdown
-     */
     public boolean isShutdown() {
         return shutdown;
     }
 
-    /**
-     * Get thread pool statistics.
-     *
-     * @return Map of statistics
-     */
     public Map<String, Object> getStats() {
         Map<String, Object> stats = new HashMap<>();
 
@@ -252,9 +158,6 @@ public class ThreadPoolManager {
         return stats;
     }
 
-    /**
-     * Named thread factory for better debugging.
-     */
     private static class NamedThreadFactory implements ThreadFactory {
         private final String name;
         private int counter;

@@ -42,13 +42,11 @@ public class HistoryCommand extends BaseCommand {
             return true;
         }
 
-        // Send header
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("history.header"));
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("history.title",
                 Map.of("player", playerName)));
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("history.header"));
 
-        // Send each punishment
         int page = 1;
         int maxPerPage = 10;
         int totalPages = (int) Math.ceil(punishments.size() / (double) maxPerPage);
@@ -57,6 +55,13 @@ public class HistoryCommand extends BaseCommand {
             try {
                 page = Integer.parseInt(args[1]);
             } catch (NumberFormatException ignored) {}
+        }
+
+        if (page < 1) {
+            page = 1;
+        }
+        if (totalPages > 0 && page > totalPages) {
+            page = totalPages;
         }
 
         int start = (page - 1) * maxPerPage;
@@ -75,7 +80,6 @@ public class HistoryCommand extends BaseCommand {
             sender.sendMessage(plugin.getMessagesManager().getColoredMessage("history.entry", placeholders));
         }
 
-        // Send footer with page info
         sender.sendMessage(plugin.getMessagesManager().getColoredMessage("history.footer"));
         if (totalPages > 1) {
             sender.sendMessage(plugin.getMessagesManager().getColoredMessage("history.page",
@@ -93,9 +97,9 @@ public class HistoryCommand extends BaseCommand {
     @Override
     protected List<String> tabComplete(CommandSender sender, String[] args) {
         if (args.length == 1) {
-            // Return all players who have punishments
+
             List<String> players = new ArrayList<>();
-            // This would need to get from storage
+
             return players;
         }
         return Collections.emptyList();

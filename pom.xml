@@ -6,7 +6,7 @@
 
     <groupId>ir.sxtm</groupId>
     <artifactId>SXBans</artifactId>
-    <version>0.53b</version>
+    <version>1.61-Release</version>
     <packaging>jar</packaging>
 
     <name>SX Bans</name>
@@ -74,7 +74,6 @@
     </repositories>
 
     <dependencies>
-        <!-- Paper API -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
@@ -82,7 +81,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Bungeecord Chat API -->
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-chat</artifactId>
@@ -100,7 +98,6 @@
             <version>9.4.51.v20230217</version>
         </dependency>
 
-        <!-- Database Drivers -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -122,7 +119,6 @@
             <version>2.2.220</version>
         </dependency>
 
-        <!-- JSON Processing -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -134,21 +130,18 @@
             <version>2.10.1</version>
         </dependency>
 
-        <!-- Web Server -->
         <dependency>
             <groupId>com.sparkjava</groupId>
             <artifactId>spark-core</artifactId>
             <version>2.9.4</version>
         </dependency>
 
-        <!-- WebSocket -->
         <dependency>
             <groupId>org.java-websocket</groupId>
             <artifactId>Java-WebSocket</artifactId>
             <version>1.5.3</version>
         </dependency>
 
-        <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -160,7 +153,6 @@
             <version>2.20.0</version>
         </dependency>
 
-        <!-- Utilities -->
         <dependency>
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
@@ -192,7 +184,7 @@
             <version>2.0</version>
         </dependency>
 
-        <!-- Redis -->
+
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
@@ -203,7 +195,6 @@
             <artifactId>HikariCP</artifactId>
             <version>5.0.1</version>
         </dependency>
-        <!-- Hooks (Optional) -->
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>

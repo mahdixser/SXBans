@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* ===== RESET & BASE ===== */
+
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Inter', -apple-system, sans-serif;
@@ -20,10 +20,8 @@
             padding: 20px;
         }
 
-        /* ===== LOGIN CONTAINER ===== */
         .login-container { width:100%; max-width:420px; }
 
-        /* ===== GLASS CARD ===== */
         .glass-card {
             background: rgba(255,255,255,0.05);
             backdrop-filter: blur(20px);
@@ -41,7 +39,6 @@
             transform: translateY(-2px);
         }
 
-        /* ===== LOGIN HEADER ===== */
         .login-header { text-align:center; margin-bottom:28px; }
         .logo-icon { font-size:40px; color:#6c5ce7; }
         .login-header h1 { font-size:26px; font-weight:800; margin:4px 0; }
@@ -54,7 +51,6 @@
             border-radius:20px;
         }
 
-        /* ===== FORM ===== */
         .form-group {
             position:relative;
             margin-bottom:14px;
@@ -96,7 +92,6 @@
             font-size:16px;
         }
 
-        /* ===== BUTTON ===== */
         .btn-primary {
             width:100%;
             padding:12px;
@@ -118,7 +113,6 @@
             box-shadow:0 8px 24px rgba(108,92,231,0.3);
         }
 
-        /* ===== ERROR ===== */
         .error-message {
             background:rgba(231,76,60,0.1);
             color:#e74c3c;
@@ -130,7 +124,6 @@
             text-align:center;
         }
 
-        /* ===== FOOTER ===== */
         .login-footer {
             text-align:center;
             font-size:12px;
@@ -139,7 +132,6 @@
         }
         .login-footer .dot { margin:0 8px; }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width:480px) {
             .glass-card { padding:24px 18px; }
             .login-header h1 { font-size:22px; }
@@ -240,7 +232,6 @@
         }
     });
 
-    // Check if already logged in
     const token = localStorage.getItem('token');
     if (token) {
         fetch('/api/auth/validate', {

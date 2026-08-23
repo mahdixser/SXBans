@@ -66,18 +66,9 @@ public class RedisManager {
 
         CompletableFuture.runAsync(() -> {
             try (Jedis jedis = jedisPool.getResource()) {
-                Map<String, String> data = new HashMap<>();
-                data.put("id", punishment.getId().toString());
-                data.put("player_uuid", punishment.getPlayerUUID().toString());
-                data.put("player_name", punishment.getPlayerName());
-                data.put("type", punishment.getType().name());
-                data.put("reason", punishment.getReason());
-                data.put("duration", String.valueOf(punishment.getDuration()));
-                data.put("executor_name", punishment.getExecutorName());
-                data.put("timestamp", String.valueOf(Instant.now().toEpochMilli()));
 
-                jedis.publish("sxbans:punishments", data.toString());
-                plugin.getSXBansLogger().info("Published punishment to Redis");
+                String json = objectMapper.writeValueAsString(punishment);
+                jedis.publish("sxbans:punishment-cache", json);
             } catch (Exception e) {
                 plugin.getSXBansLogger().warning("Failed to publish punishment to Redis: " + e.getMessage());
             }
@@ -122,7 +113,7 @@ public class RedisManager {
                 return objectMapper.readValue(json, Punishment.class);
             }
         } catch (Exception e) {
-            // Ignore
+
         }
         return null;
     }
@@ -133,7 +124,7 @@ public class RedisManager {
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.del("sxbans:punishment:" + key);
         } catch (Exception e) {
-            // Ignore
+
         }
     }
 
@@ -173,7 +164,7 @@ public class RedisManager {
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.del(key);
         } catch (Exception e) {
-            // Ignore
+
         }
     }
 
