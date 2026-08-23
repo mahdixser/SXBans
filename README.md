@@ -142,14 +142,12 @@ Details on setting up additional accounts and permission levels: [Web Panel Guid
 
 SXBans can sync punishments across every server in your network through Redis. It doesn't matter whether your proxy is BungeeCord, Waterfall, or Velocity — the sync layer talks over Redis pub/sub, not proxy-specific plugin messaging, so it works the same way regardless.
 
-If you want to build your own proxy-side plugin (say, to block a banned player at the proxy level before they even pick a server), the full message format is documented in [`NETWORK_PROTOCOL.md`](./NETWORK_PROTOCOL.md).
-
 Setup walkthrough: [Network Setup](../../Desktop/wiki/Network-Setup.md)
 
 ## Building from source
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/mahdixser/SXBans.git
 cd SXBans
 mvn clean package
 ```
@@ -160,13 +158,18 @@ The built jar will be in `target/`. Requires Maven and JDK 17+.
 
 Found a bug or something behaving weird? Open an issue with your server version, the plugin version, and your console log around the time it happened — "it doesn't work" without logs is basically impossible to chase down.
 
+OR
+
+Create A Ticket in Discord :
+[![Discord](https://img.shields.io/discord/1206332178875818014?style=for-the-badge&logo=discord&logoColor=white&label=StarX%20Development&color=5865F2)](https://discord.gg/7xFkMg6apF)
+
 ## License
 
-MIT. Do what you want with it, just don't slap your name on it and sell it as your own.
+APACHE . Do what you want with it, just don't slap your name on it and sell it as your own.
 
 ## Credits
 
-Built and maintained by xsergod. Thanks to everyone running this on their server and reporting back what broke.
+Built and maintained by xsergod & SX Team. Thanks to everyone running this on their server and reporting back what broke.
 
 ---
 
