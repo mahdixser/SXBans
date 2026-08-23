@@ -1,17 +1,17 @@
 <div align="center">
-
 <img src="SXBANS 2.png" alt="SXBans Logo" width="250" height="250">
 
 # SXBans
 
 **A punishment system for Minecraft servers that doesn't make you tab out to a spreadsheet.**
 
-[![Version](https://img.shields.io/badge/version-1.61R-blue.svg)](#)
+[![Version](https://img.shields.io/badge/version-1.61%20Release-blue.svg)](#)
 [![Minecraft](https://img.shields.io/badge/minecraft-1.13--26.2-brightgreen.svg)](#)
 [![Java](https://img.shields.io/badge/java-17%2B-orange.svg)](#)
-[![License](https://img.shields.io/badge/license-APACHE-lightgrey.svg)](#license)
+[![License](https://img.shields.io/badge/license-Apache%202.0-lightgrey.svg)](#license)
+[![Discord](https://img.shields.io/badge/discord-join%20us-5865F2.svg)](https://discord.gg/7xFkMg6apF)
 
-[Features](#features) • [Installation](#installation) • [Commands](#commands) • [Configuration](#configuration) • [Web Panel](#web-panel) • [Wiki](../../Desktop/wiki/Home.md)
+[Features](#features) • [Installation](#installation) • [Commands](#commands) • [Configuration](#configuration) • [Web Panel](#web-panel) • [Wiki](./wiki/Home.md) • [Discord](https://discord.gg/7xFkMg6apF)
 
 </div>
 
@@ -41,7 +41,7 @@ It's not trying to reinvent moderation. It's trying to be the plugin you install
 
 **Network / multi-server**
 - Redis-backed punishment sync across your whole network
-- Works with BungeeCord, Waterfall, *and* Velocity (the sync layer doesn't care which proxy you use — see [Network Setup](../../Desktop/wiki/Network-Setup.md))
+- Works with BungeeCord, Waterfall, *and* Velocity (the sync layer doesn't care which proxy you use — see [Network Setup](./wiki/Network-Setup.md))
 - Per-server identity so your logs and web panel actually tell you *which* server issued a punishment
 - A documented protocol if you want to write your own proxy-side plugin — see [`NETWORK_PROTOCOL.md`](./NETWORK_PROTOCOL.md)
 
@@ -60,7 +60,7 @@ It's not trying to reinvent moderation. It's trying to be the plugin you install
 
 ## Requirements
 
-- A Spigot or Paper server running Minecraft **1.13 through 1.21+**
+- A Spigot or Paper server running Minecraft **1.13 through 26.2**
 - Java 17 or newer
 - That's it for a basic setup. MySQL/PostgreSQL/Redis are optional and only needed if you want them.
 
@@ -96,7 +96,7 @@ That's the whole process. No database setup required unless you want one.
 
 Time format for temp punishments: `1s`, `10m`, `2h`, `7d`, `2w`, `1M`, `1y` — you can chain them too, e.g. `1d12h`.
 
-Full permission list, including bypass nodes and admin levels, is in the [Permissions](../../Desktop/wiki/Permissions.md) wiki page.
+Full permission list, including bypass nodes and admin levels, is in the [Permissions](./wiki/Permissions.md) wiki page.
 
 ## Configuration
 
@@ -126,7 +126,28 @@ If you're only running one server, you can ignore the `network` section entirely
 
 Everything else is documented inline in the config files themselves — I tried to keep the comments useful instead of restating the obvious.
 
-Deeper dive: [Configuration Reference](../../Desktop/wiki/Configuration.md)
+Deeper dive: [Configuration Reference](./wiki/Configuration.md)
+
+## Screenshots
+
+<!--
+  Drop your images into the /screenshots folder (see screenshots/README.md for
+  suggested file names) and these will render automatically on GitHub. Feel
+  free to swap out or remove any of the rows below.
+-->
+
+| Dashboard                                      | Players                                             |
+|------------------------------------------------|-----------------------------------------------------|
+| ![Dashboard](./screenshots/WebPanel-dashboard page.png) | ![Players](./screenshots/WebPanel-players page.png) |
+
+| History                                             | Login                                           |
+|-----------------------------------------------------|-------------------------------------------------|
+| ![History](./screenshots/WebPanel-History Page.png) | ![Login](./screenshots/WebPanel-login page.png) |
+
+
+| Player Info Card                                        | Applay Punishment Card                                             |
+|---------------------------------------------------------|-----------------------------------------------------|
+| ![Player Info Card](./screenshots/WebPanel-Player Info Card.png) | ![Applay Punishment Card](./screenshots/WebPanel-Applay Punishment Card.png) |
 
 ## Web Panel
 
@@ -138,13 +159,15 @@ From there you get:
 - A live server console (admin-only, obviously)
 - User management if you want to give staff their own accounts with limited permissions
 
-Details on setting up additional accounts and permission levels: [Web Panel Guide](../../Desktop/wiki/Web-Panel.md)
+Details on setting up additional accounts and permission levels: [Web Panel Guide](./wiki/Web-Panel.md)
 
 ## Multi-server networks
 
 SXBans can sync punishments across every server in your network through Redis. It doesn't matter whether your proxy is BungeeCord, Waterfall, or Velocity — the sync layer talks over Redis pub/sub, not proxy-specific plugin messaging, so it works the same way regardless.
 
-Setup walkthrough: [Network Setup](../../Desktop/wiki/Network-Setup.md)
+If you want to build your own proxy-side plugin (say, to block a banned player at the proxy level before they even pick a server), the full message format is documented in [`NETWORK_PROTOCOL.md`](./NETWORK_PROTOCOL.md).
+
+Setup walkthrough: [Network Setup](./wiki/Network-Setup.md)
 
 ## Building from source
 
@@ -160,21 +183,18 @@ The built jar will be in `target/`. Requires Maven and JDK 17+.
 
 Found a bug or something behaving weird? Open an issue with your server version, the plugin version, and your console log around the time it happened — "it doesn't work" without logs is basically impossible to chase down.
 
-OR
-
-Create A Ticket in Discord :
-[![Discord](https://img.shields.io/discord/1206332178875818014?style=for-the-badge&logo=discord&logoColor=white&label=StarX%20Development&color=5865F2)](https://discord.gg/7xFkMg6apF)
+Or just come find us on Discord: **[discord.gg/7xFkMg6apF](https://discord.gg/7xFkMg6apF)**
 
 ## License
 
-APACHE . Do what you want with it, just don't slap your name on it and sell it as your own.
+Apache License 2.0. See [`LICENSE`](./LICENSE) for the full text — short version, you're free to use, modify, and redistribute this, including commercially, as long as you keep the license/copyright notice attached.
 
 ## Credits
 
-Built and maintained by xsergod & SX Team. Thanks to everyone running this on their server and reporting back what broke.
+Built by **XserGod** and the **SX Team**. Thanks to everyone running this on their server and reporting back what broke.
 
 ---
 
 <div align="center">
-<sub>If SXBans is doing its job right, you should barely have to think about it.</sub>
+<sub>SXBans 2026</sub>
 </div>
