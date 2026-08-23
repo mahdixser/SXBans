@@ -193,6 +193,8 @@ Apache License 2.0. See [`LICENSE`](./LICENSE) for the full text — short versi
 
 Built by **XserGod** and the **SX Team**. Thanks to everyone running this on their server and reporting back what broke.
 
+## Note
+Proxy Plugins For SXBans Will Soon
 ---
 
 <div align="center">
