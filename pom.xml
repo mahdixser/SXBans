@@ -90,7 +90,6 @@
     </repositories>
 
     <dependencies>
-        <!-- ==================== PROVIDED (سرور خودش داره، shade نمیشه) ==================== -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
@@ -121,10 +120,6 @@
             <version>5.4</version>
             <scope>provided</scope>
         </dependency>
-
-        <!-- ==================== SHADED (داخل JAR قرار میگیرن) ==================== -->
-
-        <!-- وب‌سرور -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
@@ -140,15 +135,11 @@
             <artifactId>websocket-server</artifactId>
             <version>9.4.51.v20230217</version>
         </dependency>
-
-        <!-- JSON (تنها کتابخانه JSON پروژه) -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
-
-        <!-- شبکه / کش / ابزار -->
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
@@ -175,7 +166,6 @@
             <version>3.2.1</version>
         </dependency>
 
-        <!-- درایورهای دیتابیس -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
