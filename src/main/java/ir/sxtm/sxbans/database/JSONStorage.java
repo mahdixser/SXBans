@@ -1,21 +1,22 @@
 package ir.sxtm.sxbans.database;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import ir.sxtm.sxbans.SXBans;
 import ir.sxtm.sxbans.models.Punishment;
 import ir.sxtm.sxbans.models.HistoryEntry;
 import ir.sxtm.sxbans.models.IPData;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class JSONStorage {
     private final SXBans plugin;
     private final File dataDir;
-    private final ObjectMapper mapper;
+    private final Gson gson;
     private final ReentrantReadWriteLock lock;
 
     private final File punishmentsDir;
@@ -26,9 +27,11 @@ public class JSONStorage {
     public JSONStorage(SXBans plugin) {
         this.plugin = plugin;
         this.dataDir = new File(plugin.getDataFolder(), "data");
-        this.mapper = new ObjectMapper()
-                .enable(SerializationFeature.INDENT_OUTPUT)
-                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        this.gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .serializeNulls()
+                .create();
         this.lock = new ReentrantReadWriteLock();
 
         this.punishmentsDir = new File(dataDir, "punishments");
@@ -51,7 +54,9 @@ public class JSONStorage {
         lock.writeLock().lock();
         try {
             File file = new File(punishmentsDir, punishment.getId().toString() + ".json");
-            mapper.writeValue(file, punishment);
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+                gson.toJson(punishment, writer);
+            }
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save punishment: " + e.getMessage());
         } finally {
@@ -64,8 +69,10 @@ public class JSONStorage {
         try {
             File file = new File(punishmentsDir, id.toString() + ".json");
             if (!file.exists()) return null;
-            return mapper.readValue(file, Punishment.class);
-        } catch (IOException e) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                return gson.fromJson(reader, Punishment.class);
+            }
+        } catch (Exception e) {
             return null;
         } finally {
             lock.readLock().unlock();
@@ -79,10 +86,12 @@ public class JSONStorage {
             File[] files = punishmentsDir.listFiles((dir, name) -> name.endsWith(".json"));
             if (files != null) {
                 for (File file : files) {
-                    try {
-                        punishments.add(mapper.readValue(file, Punishment.class));
-                    } catch (IOException e) {
-
+                    try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                        Punishment p = gson.fromJson(reader, Punishment.class);
+                        if (p != null && p.getId() != null) {
+                            punishments.add(p);
+                        }
+                    } catch (Exception ignored) {
                     }
                 }
             }
@@ -99,13 +108,12 @@ public class JSONStorage {
             File[] files = punishmentsDir.listFiles((dir, name) -> name.endsWith(".json"));
             if (files != null) {
                 for (File file : files) {
-                    try {
-                        Punishment p = mapper.readValue(file, Punishment.class);
-                        if (p.getPlayerUUID().equals(playerUUID)) {
+                    try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                        Punishment p = gson.fromJson(reader, Punishment.class);
+                        if (p != null && p.getPlayerUUID() != null && p.getPlayerUUID().equals(playerUUID)) {
                             result.add(p);
                         }
-                    } catch (IOException e) {
-
+                    } catch (Exception ignored) {
                     }
                 }
             }
@@ -135,7 +143,9 @@ public class JSONStorage {
         lock.writeLock().lock();
         try {
             File file = new File(historyDir, entry.getId().toString() + ".json");
-            mapper.writeValue(file, entry);
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+                gson.toJson(entry, writer);
+            }
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save history: " + e.getMessage());
         } finally {
@@ -150,13 +160,12 @@ public class JSONStorage {
             File[] files = historyDir.listFiles((dir, name) -> name.endsWith(".json"));
             if (files != null) {
                 for (File file : files) {
-                    try {
-                        HistoryEntry entry = mapper.readValue(file, HistoryEntry.class);
-                        if (entry.getPlayerUUID().equals(playerUUID)) {
+                    try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                        HistoryEntry entry = gson.fromJson(reader, HistoryEntry.class);
+                        if (entry != null && entry.getPlayerUUID() != null && entry.getPlayerUUID().equals(playerUUID)) {
                             history.add(entry);
                         }
-                    } catch (IOException e) {
-
+                    } catch (Exception ignored) {
                     }
                 }
             }
@@ -174,10 +183,10 @@ public class JSONStorage {
             File[] files = historyDir.listFiles((dir, name) -> name.endsWith(".json"));
             if (files != null) {
                 for (File file : files) {
-                    try {
-                        history.add(mapper.readValue(file, HistoryEntry.class));
-                    } catch (IOException e) {
-
+                    try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                        HistoryEntry entry = gson.fromJson(reader, HistoryEntry.class);
+                        if (entry != null) history.add(entry);
+                    } catch (Exception ignored) {
                     }
                 }
             }
@@ -191,9 +200,11 @@ public class JSONStorage {
     public void saveIPData(IPData ipData) {
         lock.writeLock().lock();
         try {
-            String fileName = ipData.getIpAddress().replace('.', '_').replace(':', '_');
+            String fileName = sanitizeIpFileName(ipData.getIpAddress());
             File file = new File(ipDataDir, fileName + ".json");
-            mapper.writeValue(file, ipData);
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+                gson.toJson(ipData, writer);
+            }
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save IP data: " + e.getMessage());
         } finally {
@@ -204,11 +215,13 @@ public class JSONStorage {
     public IPData getIPData(String ip) {
         lock.readLock().lock();
         try {
-            String fileName = ip.replace('.', '_').replace(':', '_');
+            String fileName = sanitizeIpFileName(ip);
             File file = new File(ipDataDir, fileName + ".json");
             if (!file.exists()) return null;
-            return mapper.readValue(file, IPData.class);
-        } catch (IOException e) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                return gson.fromJson(reader, IPData.class);
+            }
+        } catch (Exception e) {
             return null;
         } finally {
             lock.readLock().unlock();
@@ -222,10 +235,10 @@ public class JSONStorage {
             File[] files = ipDataDir.listFiles((dir, name) -> name.endsWith(".json"));
             if (files != null) {
                 for (File file : files) {
-                    try {
-                        ipDataList.add(mapper.readValue(file, IPData.class));
-                    } catch (IOException e) {
-
+                    try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                        IPData data = gson.fromJson(reader, IPData.class);
+                        if (data != null) ipDataList.add(data);
+                    } catch (Exception ignored) {
                     }
                 }
             }
@@ -235,11 +248,18 @@ public class JSONStorage {
         }
     }
 
+    private String sanitizeIpFileName(String ip) {
+        if (ip == null) return "unknown";
+        return ip.replace('.', '_').replace(':', '_');
+    }
+
     public void saveSetting(String key, Object value) {
         lock.writeLock().lock();
         try {
             File file = new File(settingsDir, key + ".json");
-            mapper.writeValue(file, value);
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+                gson.toJson(value, writer);
+            }
         } catch (IOException e) {
             plugin.getLogger().severe("Failed to save setting: " + e.getMessage());
         } finally {
@@ -252,8 +272,10 @@ public class JSONStorage {
         try {
             File file = new File(settingsDir, key + ".json");
             if (!file.exists()) return null;
-            return mapper.readValue(file, Object.class);
-        } catch (IOException e) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                return gson.fromJson(reader, Object.class);
+            }
+        } catch (Exception e) {
             return null;
         } finally {
             lock.readLock().unlock();
@@ -300,7 +322,7 @@ public class JSONStorage {
                     copyDirectory(file, new File(destination, file.getName()));
                 } else {
                     try {
-                        java.nio.file.Files.copy(file.toPath(),
+                        Files.copy(file.toPath(),
                                 new File(destination, file.getName()).toPath(),
                                 java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e) {

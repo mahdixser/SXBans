@@ -1,6 +1,7 @@
 package ir.sxtm.sxbans.database;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import ir.sxtm.sxbans.SXBans;
 import ir.sxtm.sxbans.models.Punishment;
 import redis.clients.jedis.Jedis;
@@ -15,12 +16,12 @@ public class RedisManager {
     private final SXBans plugin;
     private JedisPool jedisPool;
     private boolean isEnabled;
-    private final ObjectMapper objectMapper;
+    private final Gson gson;
 
     public RedisManager(SXBans plugin) {
         this.plugin = plugin;
         this.isEnabled = false;
-        this.objectMapper = new ObjectMapper();
+        this.gson = new GsonBuilder().disableHtmlEscaping().create();
     }
 
     public void initialize() {
@@ -66,8 +67,7 @@ public class RedisManager {
 
         CompletableFuture.runAsync(() -> {
             try (Jedis jedis = jedisPool.getResource()) {
-
-                String json = objectMapper.writeValueAsString(punishment);
+                String json = gson.toJson(punishment);
                 jedis.publish("sxbans:punishment-cache", json);
             } catch (Exception e) {
                 plugin.getSXBansLogger().warning("Failed to publish punishment to Redis: " + e.getMessage());
@@ -97,7 +97,7 @@ public class RedisManager {
         if (!isEnabled) return;
 
         try (Jedis jedis = jedisPool.getResource()) {
-            String json = objectMapper.writeValueAsString(punishment);
+            String json = gson.toJson(punishment);
             jedis.setex("sxbans:punishment:" + key, 3600, json);
         } catch (Exception e) {
             plugin.getSXBansLogger().warning("Failed to cache punishment: " + e.getMessage());
@@ -110,10 +110,9 @@ public class RedisManager {
         try (Jedis jedis = jedisPool.getResource()) {
             String json = jedis.get("sxbans:punishment:" + key);
             if (json != null) {
-                return objectMapper.readValue(json, Punishment.class);
+                return gson.fromJson(json, Punishment.class);
             }
-        } catch (Exception e) {
-
+        } catch (Exception ignored) {
         }
         return null;
     }
@@ -123,8 +122,7 @@ public class RedisManager {
 
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.del("sxbans:punishment:" + key);
-        } catch (Exception e) {
-
+        } catch (Exception ignored) {
         }
     }
 
@@ -163,8 +161,7 @@ public class RedisManager {
 
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.del(key);
-        } catch (Exception e) {
-
+        } catch (Exception ignored) {
         }
     }
 
@@ -195,7 +192,7 @@ public class RedisManager {
         return jedisPool.getResource();
     }
 
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
+    public Gson getGson() {
+        return gson;
     }
 }

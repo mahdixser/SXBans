@@ -2,6 +2,7 @@ package ir.sxtm.sxbans.commands;
 
 import ir.sxtm.sxbans.SXBans;
 import ir.sxtm.sxbans.database.DatabaseManager;
+import ir.sxtm.sxbans.models.Punishment;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -149,7 +150,6 @@ public class SxBansCommand extends BaseCommand {
     }
 
     private void handleBackup(CommandSender sender) {
-
         sender.sendMessage("&aCreating backup...");
         try {
             java.io.File backupDir = new java.io.File(plugin.getDataFolder(), "backups");
@@ -161,9 +161,11 @@ public class SxBansCommand extends BaseCommand {
             String fileName = "backup-" + new java.text.SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new java.util.Date()) + ".json";
             java.io.File backupFile = new java.io.File(backupDir, fileName);
 
-            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper()
-                    .enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT);
-            mapper.writeValue(backupFile, allPunishments);
+            com.google.gson.Gson gson = new com.google.gson.GsonBuilder().setPrettyPrinting().create();
+            try (java.io.Writer writer = new java.io.OutputStreamWriter(
+                    new java.io.FileOutputStream(backupFile), java.nio.charset.StandardCharsets.UTF_8)) {
+                gson.toJson(allPunishments, writer);
+            }
 
             sender.sendMessage("&aBackup created successfully! (" + allPunishments.size() + " punishments) -> backups/" + fileName);
             plugin.getSXBansLogger().info("Backup created by " + sender.getName() + ": " + fileName);

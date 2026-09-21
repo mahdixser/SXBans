@@ -1,17 +1,14 @@
 package ir.sxtm.sxbans.database;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import ir.sxtm.sxbans.SXBans;
 import ir.sxtm.sxbans.models.Punishment;
 import ir.sxtm.sxbans.models.HistoryEntry;
 import ir.sxtm.sxbans.models.IPData;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,22 +16,22 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PunishmentStorage {
     private final SXBans plugin;
     private final DatabaseManager dbManager;
-    private final ObjectMapper objectMapper;
+    private final Gson gson;
     private final File jsonDataDir;
     private final Map<UUID, Punishment> punishmentCache;
-    private boolean isInitialized;
+    private final Map<UUID, List<HistoryEntry>> historyCache = new ConcurrentHashMap<>();
+    private final Map<String, IPData> ipDataMemCache = new ConcurrentHashMap<>();
 
     public PunishmentStorage(SXBans plugin) {
         this.plugin = plugin;
         this.dbManager = plugin.getDatabaseManager();
-
-        this.objectMapper = new ObjectMapper()
-                .enable(SerializationFeature.INDENT_OUTPUT)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        this.gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .serializeNulls()
+                .create();
         this.jsonDataDir = new File(plugin.getDataFolder(), "data");
         this.punishmentCache = new ConcurrentHashMap<>();
-        this.isInitialized = false;
     }
 
     public void initialize() {
@@ -47,7 +44,6 @@ public class PunishmentStorage {
         } else {
             createTables();
         }
-        isInitialized = true;
     }
 
     private void loadAllFromJson() {
@@ -61,10 +57,12 @@ public class PunishmentStorage {
         if (files == null) return;
 
         for (File file : files) {
-            try {
-                Punishment p = objectMapper.readValue(file, Punishment.class);
-                punishmentCache.put(p.getId(), p);
-            } catch (IOException e) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                Punishment p = gson.fromJson(reader, Punishment.class);
+                if (p != null && p.getId() != null) {
+                    punishmentCache.put(p.getId(), p);
+                }
+            } catch (Exception e) {
                 plugin.getSXBansLogger().warning("Failed to load punishment from " + file.getName() + ": " + e.getMessage());
             }
         }
@@ -73,7 +71,6 @@ public class PunishmentStorage {
     }
 
     private void createTables() {
-
         try (Connection conn = dbManager.getConnection();
              Statement stmt = conn.createStatement()) {
 
@@ -143,12 +140,13 @@ public class PunishmentStorage {
         return createTableSql;
     }
 
+    // ==================== PUNISHMENTS ====================
+
     public void savePunishment(Punishment punishment) {
         punishmentCache.put(punishment.getId(), punishment);
 
         if (dbManager.getType() == DatabaseManager.DatabaseType.JSON) {
             savePunishmentJson(punishment);
-            plugin.getSXBansLogger().info("Punishment saved: " + punishment.getId() + " - " + punishment.getPlayerName() + " - " + punishment.getType());
         } else {
             savePunishmentSql(punishment);
         }
@@ -160,17 +158,16 @@ public class PunishmentStorage {
             if (!punishmentsDir.exists()) {
                 punishmentsDir.mkdirs();
             }
-
             File file = new File(punishmentsDir, punishment.getId().toString() + ".json");
-            objectMapper.writeValue(file, punishment);
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+                gson.toJson(punishment, writer);
+            }
         } catch (IOException e) {
             plugin.getSXBansLogger().severe("Failed to save punishment to JSON: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
     private void savePunishmentSql(Punishment punishment) {
-
         String sql = buildPunishmentUpsertSql();
 
         try (Connection conn = dbManager.getConnection();
@@ -178,7 +175,6 @@ public class PunishmentStorage {
 
             setPunishmentParameters(stmt, punishment);
             if (dbManager.getType() == DatabaseManager.DatabaseType.MYSQL) {
-
                 setPunishmentParametersNoId(stmt, punishment, 25);
             }
             stmt.executeUpdate();
@@ -259,13 +255,15 @@ public class PunishmentStorage {
     }
 
     private Punishment getPunishmentJson(UUID id) {
-        try {
-            File file = new File(jsonDataDir, "punishments/" + id.toString() + ".json");
-            if (!file.exists()) return null;
-            Punishment p = objectMapper.readValue(file, Punishment.class);
-            punishmentCache.put(id, p);
+        File file = new File(jsonDataDir, "punishments/" + id.toString() + ".json");
+        if (!file.exists()) return null;
+        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+            Punishment p = gson.fromJson(reader, Punishment.class);
+            if (p != null) {
+                punishmentCache.put(id, p);
+            }
             return p;
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -304,12 +302,13 @@ public class PunishmentStorage {
             File[] files = punishmentsDir.listFiles((dir, name) -> name.endsWith(".json"));
             if (files != null) {
                 for (File file : files) {
-                    try {
-                        Punishment p = objectMapper.readValue(file, Punishment.class);
-                        punishments.add(p);
-                        punishmentCache.put(p.getId(), p);
-                    } catch (IOException e) {
-
+                    try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                        Punishment p = gson.fromJson(reader, Punishment.class);
+                        if (p != null && p.getId() != null) {
+                            punishments.add(p);
+                            punishmentCache.put(p.getId(), p);
+                        }
+                    } catch (Exception ignored) {
                     }
                 }
             }
@@ -426,7 +425,7 @@ public class PunishmentStorage {
         return punishment;
     }
 
-    private final Map<UUID, List<HistoryEntry>> historyCache = new ConcurrentHashMap<>();
+    // ==================== HISTORY ====================
 
     public void saveHistory(HistoryEntry entry) {
         historyCache.computeIfAbsent(entry.getPlayerUUID(), k -> new ArrayList<>()).add(entry);
@@ -445,7 +444,9 @@ public class PunishmentStorage {
                 historyDir.mkdirs();
             }
             File file = new File(historyDir, entry.getId().toString() + ".json");
-            objectMapper.writeValue(file, entry);
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+                gson.toJson(entry, writer);
+            }
         } catch (IOException e) {
             plugin.getSXBansLogger().severe("Failed to save history entry to JSON: " + e.getMessage());
         }
@@ -489,13 +490,12 @@ public class PunishmentStorage {
                 File[] files = historyDir.listFiles((dir, name) -> name.endsWith(".json"));
                 if (files != null) {
                     for (File file : files) {
-                        try {
-                            HistoryEntry entry = objectMapper.readValue(file, HistoryEntry.class);
-                            if (playerUUID.equals(entry.getPlayerUUID())) {
+                        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                            HistoryEntry entry = gson.fromJson(reader, HistoryEntry.class);
+                            if (entry != null && playerUUID.equals(entry.getPlayerUUID())) {
                                 entries.add(entry);
                             }
-                        } catch (IOException e) {
-
+                        } catch (Exception ignored) {
                         }
                     }
                 }
@@ -539,7 +539,7 @@ public class PunishmentStorage {
         return entry;
     }
 
-    private final Map<String, IPData> ipDataMemCache = new ConcurrentHashMap<>();
+    // ==================== IP DATA ====================
 
     public void saveIPData(IPData ipData) {
         ipDataMemCache.put(ipData.getIpAddress(), ipData);
@@ -558,7 +558,9 @@ public class PunishmentStorage {
                 ipDir.mkdirs();
             }
             File file = new File(ipDir, sanitizeIpFileName(ipData.getIpAddress()) + ".json");
-            objectMapper.writeValue(file, ipData);
+            try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+                gson.toJson(ipData, writer);
+            }
         } catch (IOException e) {
             plugin.getSXBansLogger().severe("Failed to save IP data to JSON: " + e.getMessage());
         }
@@ -582,7 +584,7 @@ public class PunishmentStorage {
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            String json = objectMapper.writeValueAsString(ipData);
+            String json = gson.toJson(ipData);
             stmt.setString(1, ipData.getIpAddress());
             stmt.setString(2, json);
             stmt.setLong(3, ipData.getLastSeen());
@@ -592,7 +594,7 @@ public class PunishmentStorage {
             }
             stmt.executeUpdate();
 
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             plugin.getSXBansLogger().severe("Failed to save IP data: " + e.getMessage());
         }
     }
@@ -606,9 +608,9 @@ public class PunishmentStorage {
         if (dbManager.getType() == DatabaseManager.DatabaseType.JSON) {
             File file = new File(jsonDataDir, "ipdata/" + sanitizeIpFileName(ip) + ".json");
             if (file.exists()) {
-                try {
-                    data = objectMapper.readValue(file, IPData.class);
-                } catch (IOException e) {
+                try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                    data = gson.fromJson(reader, IPData.class);
+                } catch (Exception e) {
                     plugin.getSXBansLogger().warning("Failed to read IP data for " + ip + ": " + e.getMessage());
                 }
             }
@@ -620,11 +622,11 @@ public class PunishmentStorage {
                 stmt.setString(1, ip);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        data = objectMapper.readValue(rs.getString("data"), IPData.class);
+                        data = gson.fromJson(rs.getString("data"), IPData.class);
                     }
                 }
 
-            } catch (SQLException | IOException e) {
+            } catch (SQLException e) {
                 plugin.getSXBansLogger().severe("Failed to get IP data: " + e.getMessage());
             }
         }
@@ -644,12 +646,13 @@ public class PunishmentStorage {
                 File[] files = ipDir.listFiles((dir, name) -> name.endsWith(".json"));
                 if (files != null) {
                     for (File file : files) {
-                        try {
-                            IPData data = objectMapper.readValue(file, IPData.class);
-                            result.add(data);
-                            ipDataMemCache.put(data.getIpAddress(), data);
-                        } catch (IOException e) {
-
+                        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+                            IPData data = gson.fromJson(reader, IPData.class);
+                            if (data != null) {
+                                result.add(data);
+                                ipDataMemCache.put(data.getIpAddress(), data);
+                            }
+                        } catch (Exception ignored) {
                         }
                     }
                 }
@@ -662,11 +665,12 @@ public class PunishmentStorage {
 
                 while (rs.next()) {
                     try {
-                        IPData data = objectMapper.readValue(rs.getString("data"), IPData.class);
-                        result.add(data);
-                        ipDataMemCache.put(data.getIpAddress(), data);
-                    } catch (IOException e) {
-
+                        IPData data = gson.fromJson(rs.getString("data"), IPData.class);
+                        if (data != null) {
+                            result.add(data);
+                            ipDataMemCache.put(data.getIpAddress(), data);
+                        }
+                    } catch (Exception ignored) {
                     }
                 }
 
@@ -690,7 +694,7 @@ public class PunishmentStorage {
         }
     }
 
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
+    public Gson getGson() {
+        return gson;
     }
 }

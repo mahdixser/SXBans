@@ -37,6 +37,12 @@ public class DatabaseManager {
             return;
         }
 
+        if (!DriverLoader.ensureDriver(plugin, type)) {
+            isConnected = false;
+            plugin.getSXBansLogger().severe("Database disabled: JDBC driver for " + type.name() + " is not available.");
+            return;
+        }
+
         try {
             HikariConfig hikariConfig = new HikariConfig();
             hikariConfig.setDriverClassName(getDriverClass());

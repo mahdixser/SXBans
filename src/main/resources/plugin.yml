@@ -86,7 +86,7 @@ commands:
 permissions:
   sxbans.admin:
     description: Full access to all SXBans features
-    default: false
+    default: op
   sxbans.ban:
     description: Ban players
     default: op

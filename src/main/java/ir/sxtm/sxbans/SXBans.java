@@ -16,6 +16,7 @@ import ir.sxtm.sxbans.proxy.ProxyManager;
 import ir.sxtm.sxbans.punishment.*;
 import ir.sxtm.sxbans.utils.*;
 import ir.sxtm.sxbans.web.WebServer;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -59,6 +60,9 @@ public class SXBans extends JavaPlugin {
     public void onEnable() {
         long startTime = System.currentTimeMillis();
         instance = this;
+
+        int pluginId = 33614;
+        Metrics metrics = new Metrics(this, pluginId);
 
         try {
 
